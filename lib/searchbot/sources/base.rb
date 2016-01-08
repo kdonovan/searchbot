@@ -1,5 +1,10 @@
 class Sources::Base
 
+  def self.result_details(link)
+    doc = Nokogiri::HTML( open(link) )
+    parse_result_details(link, doc)
+  end
+
   attr_reader :filters
 
   def initialize(filters, opts = {})
@@ -13,6 +18,10 @@ class Sources::Base
   end
 
   private
+
+  def self.parse_result_details(doc)
+    raise "Must be implemented in child class"
+  end
 
   def url_for_page
     raise "Must be implemented in child class"

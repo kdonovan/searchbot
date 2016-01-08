@@ -21,6 +21,7 @@ end
 require "searchbot/version"
 require "searchbot/filters"
 require "searchbot/result"
+require "searchbot/detail_result"
 require "searchbot/sources/base"
 require "searchbot/sources/business_broker"
 
