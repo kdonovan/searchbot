@@ -1,8 +1,17 @@
 class Sources::Base
+  FIREFOX = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:43.0) Gecko/20100101 Firefox/43.0'
 
-  def self.result_details(link)
-    doc = Nokogiri::HTML( open(link) )
-    parse_result_details(link, doc)
+  def self.result_details(url)
+    doc = parse(url)
+    parse_result_details(url, doc)
+  end
+
+  def self.str2i(str)
+    str.to_s.gsub(/[^\d.]/, '').to_i
+  end
+
+  def str2i(str)
+    self.class.str2i(str)
   end
 
   attr_reader :filters
@@ -13,21 +22,39 @@ class Sources::Base
   end
 
   def results
-    retrieve_results if @results.nil?
+    if @results.nil?
+      retrieve_results
+      @results.sort_by! {|r| -r.cashflow }
+    end
+
     @results
   end
 
   private
 
-  def self.parse_result_details(doc)
+  def self.parse(url)
+    html = HTTParty.get(url, headers: {'User-Agent' => FIREFOX}).body
+    Nokogiri::HTML( html )
+  end
+
+  def parse(url)
+    self.class.parse(url)
+  end
+
+  def parse_results_page(doc)
+    listings_selector(doc).each do |raw|
+      result = parse_single_result(raw)
+      next unless result.passes_filters?(filters)
+
+      @results << result
+    end
+  end
+
+  def self.parse_result_details(url, doc)
     raise "Must be implemented in child class"
   end
 
   def url_for_page
-    raise "Must be implemented in child class"
-  end
-
-  def parse_results_page(doc)
     raise "Must be implemented in child class"
   end
 
@@ -42,10 +69,12 @@ class Sources::Base
 
     while more_pages do
       url = url_for_page(curr_page)
-      doc = Nokogiri::HTML( open(url).read )
+      doc = parse(url)
+      require 'pry'; binding.pry
 
       begin
-        more_pages = parse_results_page(doc)
+        parse_results_page(doc)
+        more_pages = more_pages_available?(doc)
       rescue PreviouslySeen
         break
       end

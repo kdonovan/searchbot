@@ -11,6 +11,7 @@ class DetailResult < Hashie::Dash
   property :location
 
   property :ffe
+  property :inventory
   property :real_estate
   property :employees
   property :established
