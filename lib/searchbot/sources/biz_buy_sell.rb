@@ -1,4 +1,4 @@
-class Sources::BizBuySell < Sources::Base
+class Searchbot::Sources::BizBuySell < Searchbot::Sources::Base
   # Note that this site appears to require a known UserAgent.
   #
   BASE_URL = "http://www.bizbuysell.com/listings/handlers/searchresultsredirector.ashx"
@@ -53,7 +53,9 @@ class Sources::BizBuySell < Sources::Base
   end
 
   def more_pages_available?(doc)
-    false # TODO implement paging
+    if pager = doc.at('.bbsPager_next')
+      pager['href']
+    end
   end
 
   def next_page_url(doc)
@@ -85,7 +87,6 @@ class Sources::BizBuySell < Sources::Base
 
     info_at = -> (which) { info.css('p')[which].at('b').text }
 
-    # Note: if needed, could also extract "reason selling"
     {
       id:   link.split('/').last,
       link: link,

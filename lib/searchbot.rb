@@ -1,19 +1,18 @@
-# It doesn't feel like I should have to do this if they're already in the gemspec...
 require 'hashie'
 require 'nokogiri'
 require 'httparty'
 
 class PreviouslySeen < StandardError; end
 
-module Sources
-end
 
 module Searchbot
-  # Your code goes here...
-  module Utils
+  module Sources
   end
 
   module Results
+  end
+
+  module Utils
   end
 end
 

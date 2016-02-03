@@ -1,4 +1,4 @@
-class Sources::BusinessBroker < Sources::Base
+class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
   # This class actually uses the API directly for the main search results, and only
   # does the "normal" scraping for result details.
 
@@ -84,6 +84,7 @@ class Sources::BusinessBroker < Sources::Base
 
         more_pages = @results.length > prev_length
         curr_page += 1
+        break if max_pages && curr_page > max_pages
       end
     end
 

@@ -2,7 +2,7 @@ RSpec.shared_examples "a valid source" do |config|
 
   context "shared specs" do
     let(:filters) { Filters.new(min_cashflow: 300_000, state: 'Washington') }
-    let(:source)  { config[:source].new(filters) }
+    let(:source)  { config[:source].new(filters).tap {|s| s.max_pages = 1 } }
     let(:results) { source.results }
 
     context "faked", :vcr do

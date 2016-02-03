@@ -1,5 +1,8 @@
-class Sources::Base
+class Searchbot::Sources::Base
   FIREFOX = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:43.0) Gecko/20100101 Firefox/43.0'
+
+  # When set (e.g. testing), limits results to this many pages
+  attr_accessor :max_pages
 
   def self.result_details(listing)
     doc     = parse(listing.link)
@@ -74,6 +77,7 @@ class Sources::Base
       end
 
       curr_page += 1
+      break if max_pages && curr_page > max_pages
     end
   end
 
