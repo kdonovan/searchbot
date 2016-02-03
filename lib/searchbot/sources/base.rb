@@ -1,17 +1,12 @@
 class Sources::Base
   FIREFOX = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:43.0) Gecko/20100101 Firefox/43.0'
 
-  def self.result_details(url)
-    doc = parse(url)
-    parse_result_details(url, doc)
-  end
+  def self.result_details(listing)
+    doc     = parse(listing.link)
+    details = parse_result_details(listing, doc)
 
-  def self.str2i(str)
-    str.to_s.gsub(/[^\d.]/, '').to_i
-  end
-
-  def str2i(str)
-    self.class.str2i(str)
+    params = listing.to_hash.merge(details)
+    Searchbot::Results::Details.new( params )
   end
 
   attr_reader :filters
@@ -50,7 +45,7 @@ class Sources::Base
     end
   end
 
-  def self.parse_result_details(url, doc)
+  def self.parse_result_details(listing, doc)
     raise "Must be implemented in child class"
   end
 
@@ -70,7 +65,6 @@ class Sources::Base
     while more_pages do
       url = url_for_page(curr_page)
       doc = parse(url)
-      require 'pry'; binding.pry
 
       begin
         parse_results_page(doc)

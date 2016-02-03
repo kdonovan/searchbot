@@ -1,22 +1,29 @@
-class Result < Hashie::Dash
+class Searchbot::Results::Base < Hashie::Dash
+  include Hashie::Extensions::Dash::PropertyTranslation
+  extend Searchbot::Utils::Parsing
+
+  property :source_klass
+
   property :id,      required: true
   property :link,    required: true
 
-  property :cashflow
-  property :revenue
+  property :price,    transform_with: ->(v) { str2i(v) }
+  property :cashflow, transform_with: ->(v) { str2i(v) }
+  property :revenue,  transform_with: ->(v) { str2i(v) }
+
   property :title
   property :teaser
-  property :price
 
-  attr_accessor :source_klass
+  property :city
+  property :state
 
-  def initialize(source, *attrs)
-    @source_klass = source.class
-    super(*attrs)
-  end
 
-  def detail
-    @detail ||= source_klass.result_details(link)
+  # Many sites have cashflow and/or EBITDA and/or net profit, and brokers
+  # don't use them consistently. Go with the lowest non-zero number.
+  property :cashflow_from
+
+  def cashflow
+    self[:cashflow] || Array(self[:cashflow_from]).map {|k| self.class.str2i(k) }.reject {|v| v.zero? }.min
   end
 
   def passes_filters?(filters)

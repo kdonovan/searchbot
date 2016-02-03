@@ -1,118 +1,119 @@
 class Sources::BusinessBroker < Sources::Base
+  # This class actually uses the API directly for the main search results, and only
+  # does the "normal" scraping for result details.
 
-  BASE_URL = "https://www.businessbroker.net/listings/bfs_result.aspx"
+  BASE_URL = 'https://www.businessbroker.net/webservices/dataservice.asmx/getlistingdata'
 
-  def url_for_page(page = nil)
-    params = {
-      by: 'advancedsearch',
+  private
 
-      map_id: map_id_for_state( filters.state ),
+    def params_for_search
+      {
+        strIndId: '0',
+        strIndAlias: '',
+        regId: 33,
+        regParentId: 0,
 
-      ask_price_l: filters.min_asking_price,
-      ask_price_h: filters.max_asking_price,
+        askPriceLow: filters.min_asking_price.to_i,
+        askPriceHigh: filters.max_asking_price.to_i,
+        mapId: map_id_for_state( filters.state ),
 
-      # City name
-      lcity: nil,
+        strCity: '',
+        strKeyword: '',
+        timeFrame: 0,   # Listing within last n days
+        noPrice: 1,     # 1 = do NOT show listings without asking price, 0 = show them
+        franchiseResale: 0,
+        ownerFinancing: 0,
+        countyId: 0,
+        strListedOnDate: '',
+        sortBy: 'l.flisting DESC, l.ldate DESC', # Newest to oldest
+      }
+    end
 
-      # Keyword search
-      keyword: nil,
+    def params_for_page(page)
+      per_page = 50
+      params_for_search.merge({
+        startAt: (page - 1) * per_page + 1,
+        howMany: per_page
+      })
+    end
 
-      # Specific listing number
-      lst_no: nil,
+    def parse_data_for_page(page)
+      request = HTTParty.post(
+        BASE_URL,
+        headers: {'User-Agent' => FIREFOX, 'Content-Type' => 'application/json; charset=UTF-8'},
+        body: params_for_page(page).to_json
+      )
 
-      # Listed within the last n days
-      time: 0,
+      JSON.parse( request.body )['d'].map do |json|
+        parse_single_listing(json)
+      end
+    end
 
-      # Owner Finance Only
-      ownerfi: 0,
+    def parse_single_listing(json)
+      get = -> (field) {
+        json[field] == 'Not Disclosed' ? nil : json[field]
+      }
 
-      # County ID
-      county_id: 0,
+      Searchbot::Results::Listing.new(
+        source_klass: self.class,
+        price:      get['Price'],
+        cashflow:   get['CashFlow'],
+        revenue:    get['YearlyRevenue'],
+        title:      get['Heading'],
+        teaser:     get['Overview'],
+        link:       URI.join( BASE_URL, get['URL'] ).to_s,
+        id:         get['ListID'].to_s,
+        city:       get['City'],
+        state:      get['State'],
+      )
+    end
 
-      # ?
-      bprice: 1,
-      fresale: 0,
-      r_id: 33,
-      ind_id: 0,
-    }
+    def retrieve_results
+      @results = []
+      more_pages = true
+      curr_page = 1
 
-    params['pg'] = page unless page.nil?
+      while more_pages do
+        prev_length = @results.length
 
-    [BASE_URL, params.map {|k, v| [k, v].join('=')}.join('&')].join('?')
-  end
+        begin
+          @results += parse_data_for_page(curr_page)
+        rescue PreviouslySeen
+          break
+        end
 
-  def listings_selector(doc)
-    doc.css('.listing-row')
-  end
+        more_pages = @results.length > prev_length
+        curr_page += 1
+      end
+    end
 
-  def more_pages_available?(doc)
-    doc.at('.pagination').css('a').detect {|l| l.text == 'Next Page >' }
-  end
+    def map_id_for_state(state)
+      STATE_ID_MAP[state] || 0
+    end
 
-  def parse_single_result(raw)
-    finance = raw.at('.listing-item-financials')
-    title   = raw.at('.listing-text-title')
-    link    = title.at('a')['href']
-    teaser  = raw.at('.listing-item-desc').css('div').last.text
-    id      = self.class.id_from_url(link)
+    def self.parse_result_details(listing, doc)
+      get = -> (path) { doc.at("##{path}").text }
 
-    raise PreviouslySeen if seen.include?(id)
+      desc = [
+        "Business Overview: #{get['lbloverview']}",
+        "Property Features: #{get['lblfeatures']}",
+      ].join("\n\n\n")
 
-    Result.new(self, {
-      price:      str2i( finance.css('.financial-text-top')[1].text ),
-      cashflow:   str2i( finance.css('.financial-text')[1].text ),
-      revenue:    str2i( finance.css('.financial-text')[3].text ),
-      title:      title.text,
-      teaser:     teaser,
-      link:       link,
-      id:         id,
-    })
-  end
+      {
+        description:    desc,
+        cashflow_from:  [get['lblycflow'], get['lblynprofit']],
 
-  def self.id_from_url(url)
-    url.split('/').last.split('.').first
-  end
+        ffe:            get['lblFFE'],
+        real_estate:    get['lblRealEstate'],
+        employees:      get['lblemploy'],
+        established:    get['lblYest'],
 
-  def self.parse_result_details(url, doc)
-    info = doc.at('#details-bfs').at('.info')
+        seller_financing: !!doc.at('#divOwnerFinancing'),
+        reason_selling:   get['lblreason'],
+      }
+    end
 
-    string_at = -> (path) { doc.at("##{path}").text }
-    number_at = -> (path) { str2i( string_at[path] ) }
-
-    # Sometimes miscategorized, so go with the smallest number provided
-    cashflow = ['lblycflow', 'lblynprofit'].map {|key| number_at[key] }.reject {|v| v.zero? }.min
-
-    desc = [
-      "Business Overview: #{string_at['lbloverview']}",
-      "Property Features: #{string_at['lblfeatures']}",
-      "Market Competition and Expansion: #{string_at['lbloverview']}",
-    ].join("\n\n\n")
-
-    DetailResult.new({
-      id:   id_from_url(url),
-      link: url,
-
-      title:     doc.at('h2.title').text,
-      location:  doc.at('h2.location').text,
-
-      price:        number_at['lblPrice'],
-      revenue:      number_at['lblyrevenue'],
-      cashflow:     cashflow,
-
-      ffe:          number_at['lblFFE'],
-      real_estate:  number_at['lblRealEstate'],
-      employees:    number_at['lblemploy'],
-      established:  number_at['lblYest'],
-
-      seller_financing: !!doc.at('#divOwnerFinancing'),
-      reason_selling:   string_at['lblreason'],
-
-      description:  desc,
-    })
-  end
-
-  def map_id_for_state(state)
-    mapping = {
+    STATE_ID_MAP = {
       "Alabama" => 9,
       "Alaska" => 8,
       "Arizona" => 11,
@@ -168,8 +169,5 @@ class Sources::BusinessBroker < Sources::Base
       "Wisconsin" => 56,
       "Wyoming" => 58,
     }
-
-    mapping[state] || 0
-  end
 
 end

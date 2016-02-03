@@ -62,56 +62,52 @@ class Sources::BizBuySell < Sources::Base
   def parse_single_result(raw)
     id       = raw['data-listnumber']
     info     = raw.at('.priceBlock')
-    price    = info.at('.price') ? str2i( info.at('.price').text ) : nil
-    cashflow = info.at('.cflow') ? str2i( info.at('.cflow').text ) : nil
+    price    = info.at('.price')
+    cashflow = info.at('.cflow')
 
     raise PreviouslySeen if seen.include?(id)
 
-    Result.new(self, {
+    Searchbot::Results::Listing.new(
+      source_klass: self.class,
       id:         id,
       price:      price,
       cashflow:   cashflow,
       link:       URI.join(BASE_URL, raw['href']).to_s,
       title:      raw.at('.title').text,
       teaser:     raw.at('.desc').text,
-    })
+    )
   end
 
-  def self.parse_result_details(url, doc)
+  def self.parse_result_details(listing, doc)
     doc.xpath("//script").remove
-    link = url.split('?')[0]
+    link = listing.link.split('?')[0]
     info = doc.at('.financials')
 
-    info_at = -> (which) { str2i( info.css('p')[which].at('b').text ) }
+    info_at = -> (which) { info.css('p')[which].at('b').text }
 
-    # Sometimes miscategorized, so go with the smallest number provided
-    cashflow = [info_at[2], info_at[3]].reject {|v| v.zero? }.min
-
-    params = {
+    # Note: if needed, could also extract "reason selling"
+    {
       id:   link.split('/').last,
       link: link,
 
       title:     doc.at('h1').text.strip,
       location:  doc.at('h2.gray').text.strip,
 
-      price:        info_at[0],
-      revenue:      info_at[1],
-      cashflow:     cashflow,
+      price:          info_at[0],
+      revenue:        info_at[1],
+      cashflow_from:  [info_at[2], info_at[3]],
 
-      ffe:          info_at[4],
-      inventory:    info_at[5],
+      ffe:            info_at[4],
+      inventory:      info_at[5],
 
-      real_estate:  info_at[6],
-      established:  info_at[7],
-      employees:    info_at[8],
+      real_estate:    info_at[6],
+      established:    info_at[7],
+      employees:      info_at[8],
 
       description:  parse_desc(doc),
 
       seller_financing: !!doc.at('#seller-financing'),
     }
-
-    # Note: if needed, could also extract "reason selling"
-    DetailResult.new(params)
   end
 
   def self.parse_desc(doc)
