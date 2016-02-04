@@ -23,26 +23,71 @@ module Searchbot
     # don't use them consistently. Go with the lowest non-zero number.
     property :cashflow_from
 
+    # Use this to filter out city, state as needed
+    property :location
+
     def cashflow
       self[:cashflow] || Array(self[:cashflow_from]).map {|k| self.class.str2i(k) }.reject {|v| v.zero? }.min
     end
 
+    def city
+      self[:city] || parse_location[0]
+    end
+
+    # Always return the two-character state, if possible
+    def state
+      self.class.state_abbrev( self[:state] || parse_location[1] )
+    end
+
     def passes_filters?(filters)
       filters.all? do |key, value|
-        if key.to_s.include?('_') # Handle two-part value (e.g. min_cashflow)
-          min_max, field = key.to_s.split('_').map(&:to_sym)
-          passes_complex_filter?(field, min_max, value)
-        else # Handle simple value (e.g. State = Washington)
-          passes_simple_filter?(key, value)
-        end
+        # Some filters must be applied to the detailed version - if so, grab the details now
+        to_test = (self.respond_to?(:detail) && filters.detail_only?(key)) ? self.detail : self
+        to_test.passes_filter?(key, value)
+      end
+    end
+
+    def passes_filter?(key, value)
+      k = key.to_s
+      constraint = k.include?('_') ? k.split('_').first.to_sym : nil
+      field = constraint ? k.split("#{constraint}_")[1].to_sym : key
+
+      # Default to skipping those without enough data
+      return unless self.send(field)
+
+      if constraint # Handle two-part value (e.g. min_cashflow)
+        passes_complex_filter?(field, constraint, value)
+      else # Handle simple value (e.g. State = Washington)
+        passes_simple_filter?(key, value)
+      end
+    end
+
+    # Modify reported keys to include those created from others (e.g. location, cashflow_from)
+    def keys
+      super.tap do |raw|
+        raw << :city  if city  && !raw.index(:city)
+        raw << :state if state && !raw.index(:state)
+        raw.delete(:location)
+
+        raw << :cashflow if cashflow && !raw.index(:cashflow)
+        raw.delete(:cashflow_from)
       end
     end
 
     private
 
-    def passes_complex_filter?(field, min_max, value)
-      return true unless self.keys.include?(field)
+    def parse_location
+      return [] unless self[:location]
 
+      city, state = self[:location].to_s.split(',').map(&:strip)
+      state, city = city, state if state.nil? # e.g. "FL"
+      city  = nil if city.to_s =~ /county/i
+      state = nil if state == 'US'
+
+      [city, state]
+    end
+
+    def passes_complex_filter?(field, min_max, value)
       case min_max
       when :min then self[field] >= value
       when :max then self[field] <= value
@@ -51,8 +96,16 @@ module Searchbot
     end
 
     def passes_simple_filter?(field, value)
-      return true unless self.keys.include?(field)
-      self[field] == value
+      case field
+      when :city # e.g. for Seattle, allow city = "Seattle Metro"
+        city.to_s.match(/#{value}/)
+      when :state # check both WA and Washington
+        state == value || self.class.state_alt_display(state) == value
+      when :keyword
+        self.values.any? {|v| v.to_s.match(/#{keyword}/)}
+      else
+        self[field] == value
+      end
     end
 
   end

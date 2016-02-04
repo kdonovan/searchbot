@@ -1,6 +1,6 @@
 class Filters < Hashie::Dash
-  property :min_asking_price
-  property :max_asking_price
+  property :min_price
+  property :max_price
 
   property :min_cashflow
   property :max_cashflow
@@ -9,6 +9,13 @@ class Filters < Hashie::Dash
   property :max_revenue
 
   property :state
+  property :city
+
+  property :keyword
+
+  def detail_only?(field)
+    !![:min_revenue, :max_revenue].index(field)
+  end
 
   def state_abbrev
     state ? STATE_TO_ABBREV[state] : nil

@@ -5,7 +5,7 @@ RSpec.shared_examples "a valid source" do |config|
     let(:source)  { config[:source].new(filters).tap {|s| s.max_pages = 1 } }
     let(:results) { source.results }
 
-    context "faked", :vcr do
+    context "faked", vcr: {match_requests_on: [:method, :uri, :body]} do
 
       it 'returns results' do
         expect(results.length).not_to eq(0)
@@ -36,6 +36,61 @@ RSpec.shared_examples "a valid source" do |config|
         end
 
       end
+
+      # %w(price cashflow revenue).each do |field|
+      %w(cashflow).each do |field|
+        %w(min max).each do |direction|
+
+          context "filters by #{direction} #{field}" do
+            let(:filters) { Filters.new("#{direction}_#{field}": 200_000) }
+
+            it "correctly" do
+              key = "#{direction}_#{field}".to_sym
+              tested_one = nil
+
+              results.each do |result|
+                result = result.detail if filters.detail_only?(key)
+
+                if val = result.send(field)
+                  tested_one = true
+                  if direction == 'min'
+                    expect(val).to be >= filters.send(key)
+                  else
+                    expect(val).to be <= filters.send(key)
+                  end
+                end
+              end
+
+              expect(tested_one).to be true
+            end
+          end
+
+        end
+      end
+
+      context "filters by state" do
+
+        it "correctly" do
+          results.each do |result|
+            expect(result.state).to eq 'WA'
+          end
+        end
+
+      end
+
+      context "filters by city" do
+
+        let(:filters) { Filters.new(min_cashflow: 100_000, state: 'Washington', city: 'Seattle') }
+
+        it "correctly" do
+          results.each do |result|
+            expect(result.state).to eq 'WA'
+            expect(result.city).to match /Seattle/i
+          end
+        end
+
+      end
+
 
     end
 

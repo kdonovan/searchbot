@@ -7,3 +7,8 @@ VCR.configure do |config|
   config.hook_into :webmock # or :fakeweb
   config.configure_rspec_metadata!
 end
+
+RSpec.configure do |config|
+  config.filter_run focus: true
+  config.run_all_when_everything_filtered = true
+end

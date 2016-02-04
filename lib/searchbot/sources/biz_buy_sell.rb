@@ -9,11 +9,11 @@ class Searchbot::Sources::BizBuySell < Searchbot::Sources::Base
       s: filters.state_abbrev,
 
       # Keyword
-      k: nil,
+      k: "#{filters.city} #{filters.keyword}".strip,
 
       # Asking Price
-      pto: filters.max_asking_price,
-      pfrom: filters.min_asking_price,
+      pto: filters.max_price,
+      pfrom: filters.min_price,
 
       # Gross Income
       gito: filters.max_revenue,
@@ -22,7 +22,6 @@ class Searchbot::Sources::BizBuySell < Searchbot::Sources::Base
       # Cashflow
       cfto: filters.max_cashflow,
       cffrom: filters.min_cashflow,
-
 
       hb: nil, # Home based (default: show all)
       bm: nil, # Broker Membership
@@ -58,14 +57,12 @@ class Searchbot::Sources::BizBuySell < Searchbot::Sources::Base
     end
   end
 
-  def next_page_url(doc)
-  end
-
   def parse_single_result(raw)
     id       = raw['data-listnumber']
     info     = raw.at('.priceBlock')
     price    = info.at('.price')
     cashflow = info.at('.cflow')
+    location = raw.at('.info') && raw.at('.info').text.strip
 
     raise PreviouslySeen if seen.include?(id)
 
@@ -76,6 +73,7 @@ class Searchbot::Sources::BizBuySell < Searchbot::Sources::Base
       cashflow:   cashflow,
       link:       URI.join(BASE_URL, raw['href']).to_s,
       title:      raw.at('.title').text,
+      location:   location,
       teaser:     raw.at('.desc').text,
     )
   end
@@ -91,8 +89,8 @@ class Searchbot::Sources::BizBuySell < Searchbot::Sources::Base
       id:   link.split('/').last,
       link: link,
 
-      title:     doc.at('h1').text.strip,
-      location:  doc.at('h2.gray').text.strip,
+      title:      doc.at('h1').text.strip,
+      location:   doc.at('h2.gray').text.strip,
 
       price:          info_at[0],
       revenue:        info_at[1],

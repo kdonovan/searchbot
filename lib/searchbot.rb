@@ -2,6 +2,11 @@ require 'hashie'
 require 'nokogiri'
 require 'httparty'
 
+begin
+  require 'pry'
+rescue LoadError
+end
+
 class PreviouslySeen < StandardError; end
 
 

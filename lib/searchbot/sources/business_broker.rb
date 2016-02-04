@@ -1,6 +1,9 @@
 class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
   # This class actually uses the API directly for the main search results, and only
   # does the "normal" scraping for result details.
+  #
+  # Note that we can only filter by asking price+location+keywords in the initial search -
+  # we have to do the filtering on cashflow, etc. once results have already been retrieved.
 
   BASE_URL = 'https://www.businessbroker.net/webservices/dataservice.asmx/getlistingdata'
 
@@ -13,12 +16,13 @@ class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
         regId: 33,
         regParentId: 0,
 
-        askPriceLow: filters.min_asking_price.to_i,
-        askPriceHigh: filters.max_asking_price.to_i,
+        askPriceLow: filters.min_price.to_i,
+        askPriceHigh: filters.max_price.to_i,
         mapId: map_id_for_state( filters.state ),
 
-        strCity: '',
-        strKeyword: '',
+        strCity: filters.city,
+        strKeyword: filters.keyword,
+
         timeFrame: 0,   # Listing within last n days
         noPrice: 1,     # 1 = do NOT show listings without asking price, 0 = show them
         franchiseResale: 0,
@@ -31,21 +35,28 @@ class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
 
     def params_for_page(page)
       per_page = 50
+
       params_for_search.merge({
         startAt: (page - 1) * per_page + 1,
         howMany: per_page
       })
     end
 
+    def request_headers
+      {'User-Agent' => FIREFOX, 'Content-Type' => 'application/json; charset=UTF-8'}
+    end
+
     def parse_data_for_page(page)
       request = HTTParty.post(
         BASE_URL,
-        headers: {'User-Agent' => FIREFOX, 'Content-Type' => 'application/json; charset=UTF-8'},
+        headers: request_headers,
         body: params_for_page(page).to_json
       )
 
       JSON.parse( request.body )['d'].map do |json|
         parse_single_listing(json)
+      end.select do |result|
+        result.passes_filters?(filters)
       end
     end
 
@@ -93,7 +104,7 @@ class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
     end
 
     def self.parse_result_details(listing, doc)
-      get = -> (path) { doc.at("##{path}").text }
+      get = -> (path) { doc.at("##{path}") && doc.at("##{path}").text }
 
       desc = [
         "Business Overview: #{get['lbloverview']}",

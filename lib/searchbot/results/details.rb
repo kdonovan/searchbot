@@ -1,7 +1,6 @@
 class Searchbot::Results::Details < Searchbot::Results::Base
 
   property :description
-  property :location
 
   property :ffe,          transform_with: ->(v) { str2i(v) }
   property :inventory,    transform_with: ->(v) { str2i(v) }

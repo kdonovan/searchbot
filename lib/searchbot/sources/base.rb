@@ -14,17 +14,13 @@ class Searchbot::Sources::Base
 
   attr_reader :filters
 
-  def initialize(filters, opts = {})
+  def initialize(filters)
     @filters = filters
     @results = nil
   end
 
   def results
-    if @results.nil?
-      retrieve_results
-      @results.sort_by! {|r| -r.cashflow }
-    end
-
+    retrieve_results if @results.nil?
     @results
   end
 
