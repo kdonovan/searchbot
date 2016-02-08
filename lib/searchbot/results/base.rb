@@ -41,9 +41,14 @@ module Searchbot
 
     def passes_filters?(filters)
       filters.all? do |key, value|
-        # Some filters must be applied to the detailed version - if so, grab the details now
-        to_test = (self.respond_to?(:detail) && filters.detail_only?(key)) ? self.detail : self
-        to_test.passes_filter?(key, value)
+        # Skip any filters with nil values. Some filter keys are for search-time only, not after-search filtering.
+        if value.nil? || %i(keyword).include?(key)
+          true
+        else
+          # Some filters must be applied to the detailed version - if so, grab the details now
+          to_test = (self.respond_to?(:detail) && filters.detail_only?(key)) ? self.detail : self
+          to_test.passes_filter?(key, value)
+        end
       end
     end
 

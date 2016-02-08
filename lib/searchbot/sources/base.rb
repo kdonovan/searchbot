@@ -15,7 +15,7 @@ class Searchbot::Sources::Base
   attr_reader :filters
 
   def initialize(filters)
-    @filters = filters
+    @filters = Filters.coerce( filters )
     @results = nil
   end
 

@@ -1,4 +1,12 @@
 class Filters < Hashie::Dash
+
+  def self.coerce(other)
+    case other
+    when Filters then other
+    else Filters.new( other )
+    end
+  end
+
   property :min_price
   property :max_price
 

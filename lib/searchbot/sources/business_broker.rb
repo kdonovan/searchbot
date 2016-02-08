@@ -65,13 +65,16 @@ class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
         json[field] == 'Not Disclosed' ? nil : json[field]
       }
 
+      teaser = get['Overview'].strip
+      teaser.downcase! if teaser == teaser.upcase
+
       Searchbot::Results::Listing.new(
         source_klass: self.class,
         price:      get['Price'],
         cashflow:   get['CashFlow'],
         revenue:    get['YearlyRevenue'],
         title:      get['Heading'],
-        teaser:     get['Overview'],
+        teaser:     teaser,
         link:       URI.join( BASE_URL, get['URL'] ).to_s,
         id:         get['ListID'].to_s,
         city:       get['City'],
@@ -104,12 +107,18 @@ class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
     end
 
     def self.parse_result_details(listing, doc)
-      get = -> (path) { doc.at("##{path}") && doc.at("##{path}").text }
+      get = -> (path) {
+        if doc.at("##{path}")
+          raw = doc.at("##{path}").text
+          raw.downcase! if raw == raw.upcase
+          raw
+        end
+      }
 
       desc = [
         "Business Overview: #{get['lbloverview']}",
         "Property Features: #{get['lblfeatures']}",
-      ].join("\n\n\n")
+      ].join("\n\n\n").strip
 
       {
         description:    desc,

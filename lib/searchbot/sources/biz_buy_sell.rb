@@ -74,7 +74,7 @@ class Searchbot::Sources::BizBuySell < Searchbot::Sources::Base
       link:       URI.join(BASE_URL, raw['href']).to_s,
       title:      raw.at('.title').text,
       location:   location,
-      teaser:     raw.at('.desc').text,
+      teaser:     raw.at('.desc').text.strip,
     )
   end
 
@@ -103,7 +103,7 @@ class Searchbot::Sources::BizBuySell < Searchbot::Sources::Base
       established:    info_at[7],
       employees:      info_at[8],
 
-      description:  parse_desc(doc),
+      description:  parse_desc(doc).strip,
 
       seller_financing: !!doc.at('#seller-financing'),
     }
