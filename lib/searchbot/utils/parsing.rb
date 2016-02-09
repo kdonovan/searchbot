@@ -10,6 +10,8 @@ module Searchbot::Utils::Parsing
   end
 
   def state_to_abbrev(full_name)
+    return unless full_name
+
     match = STATES.invert.detect {|full, abbrev| full.downcase == full_name.downcase }
     match && match[1]
   end
@@ -23,7 +25,7 @@ module Searchbot::Utils::Parsing
   end
 
   def state_abbrev(state)
-    return state if state.to_s.length == 2
+    return state.upcase if state.to_s.length == 2
     state_to_abbrev(state)
   end
 

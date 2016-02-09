@@ -70,9 +70,9 @@ class Searchbot::Sources::BizBuySell < Searchbot::Sources::Base
       price:      price,
       cashflow:   cashflow,
       link:       URI.join(BASE_URL, raw['href']).to_s,
-      title:      raw.at('.title').text,
-      location:   location,
-      teaser:     raw.at('.desc').text.strip,
+      title:      sane( raw.at('.title').text ),
+      location:   sane( location ),
+      teaser:     sane( raw.at('.desc').text ),
     )
   end
 
@@ -87,8 +87,8 @@ class Searchbot::Sources::BizBuySell < Searchbot::Sources::Base
       id:   link.split('/').last,
       link: link,
 
-      title:      doc.at('h1').text.strip,
-      location:   doc.at('h2.gray').text.strip,
+      title:      sane( doc.at('h1').text ),
+      location:   sane( doc.at('h2.gray').text ),
 
       price:          info_at[0],
       revenue:        info_at[1],
@@ -101,7 +101,7 @@ class Searchbot::Sources::BizBuySell < Searchbot::Sources::Base
       established:    info_at[7],
       employees:      info_at[8],
 
-      description:  parse_desc(doc).strip,
+      description:    sane( parse_desc(doc) ),
 
       seller_financing: !!doc.at('#seller-financing'),
     }
@@ -119,7 +119,7 @@ class Searchbot::Sources::BizBuySell < Searchbot::Sources::Base
       break if node['class'] == 'listingProfile_details'
     end
 
-    desc.join("\n\n\n")
+    desc.join( divider )
   end
 
 

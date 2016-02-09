@@ -27,6 +27,24 @@ class Searchbot::Sources::Base
 
   private
 
+  def self.divider
+    "\n\n\n"
+  end
+
+  def sane(string)
+    self.class.sane(string)
+  end
+
+  def self.sane(string)
+    return unless string
+
+    string.strip!
+    if string && string.upcase == string
+      string.downcase.split('.').map(&:capitalize).join('.')
+    else string
+    end
+  end
+
   def self.parse(url)
     html = HTTParty.get(url, headers: {'User-Agent' => FIREFOX}).body
     Nokogiri::HTML( html )

@@ -63,20 +63,17 @@ class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
         json[field] == 'Not Disclosed' ? nil : json[field]
       }
 
-      teaser = get['Overview'].strip
-      teaser.downcase! if teaser == teaser.upcase
-
       Searchbot::Results::Listing.new(
         source_klass: self.class,
         price:      get['Price'],
         cashflow:   get['CashFlow'],
         revenue:    get['YearlyRevenue'],
-        title:      get['Heading'],
-        teaser:     teaser,
+        title:      sane( get['Heading'] ),
+        teaser:     sane( get['Overview'] ),
         link:       URI.join( BASE_URL, get['URL'] ).to_s,
         id:         get['ListID'].to_s,
-        city:       get['City'],
-        state:      get['State'],
+        city:       sane( get['City'] ),
+        state:      sane( get['State'] ),
       )
     end
 
@@ -119,13 +116,12 @@ class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
         end
       }
 
-      desc = [
-        "Business Overview: #{get['lbloverview']}",
-        "Property Features: #{get['lblfeatures']}",
-      ].join("\n\n\n").strip
+      desc = []
+      desc << "[Business Overview]: #{sane get['lbloverview']}" if get['lbloverview'].to_s.strip.length > 0
+      desc << "[Property Features]: #{sane get['lblfeatures']}" if get['lblfeatures'].to_s.strip.length > 0
 
       {
-        description:    desc,
+        description:    desc.join( divider ),
         cashflow_from:  [get['lblycflow'], get['lblynprofit']],
 
         ffe:            get['lblFFE'],
@@ -134,7 +130,7 @@ class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
         established:    get['lblYest'],
 
         seller_financing: !!doc.at('#divOwnerFinancing'),
-        reason_selling:   get['lblreason'],
+        reason_selling:   sane( get['lblreason'] ),
       }
     end
 

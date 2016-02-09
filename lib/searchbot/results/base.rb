@@ -40,7 +40,7 @@ module Searchbot
     end
 
     def passes_filters?(filters)
-      filters.all? do |key, value|
+      passes_hardcoded_filters? && filters.all? do |key, value|
         # Skip any filters with nil values. Some filter keys are for search-time only, not after-search filtering.
         if value.nil? || %i(keyword).include?(key)
           true
@@ -89,7 +89,17 @@ module Searchbot
       city  = nil if city.to_s =~ /county/i
       state = nil if state == 'US'
 
-      [city, self.class.state_abbrev(state)]
+      [handle_case( city ), self.class.state_abbrev(state)]
+    end
+
+    def handle_case(str)
+      return unless str
+
+      if str == str.downcase || str == str.upcase
+        str.split('. ').map(&:strip).map(&:capitalize).join('. ')
+      else
+        str
+      end
     end
 
     def passes_complex_filter?(field, min_max, value)
@@ -111,6 +121,14 @@ module Searchbot
       else
         self[field] == value
       end
+    end
+
+    # A collection of hardcoded filters
+    def passes_hardcoded_filters?
+      # If we have decent revenue, but cashflow is almost equal to revenue, that's sketchy
+      return if cashflow && revenue && revenue > 200_000 && (cashflow > revenue - 50_000)
+
+      true
     end
 
   end
