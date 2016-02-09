@@ -89,7 +89,7 @@ module Searchbot
       city  = nil if city.to_s =~ /county/i
       state = nil if state == 'US'
 
-      [city, state]
+      [city, self.class.state_abbrev(state)]
     end
 
     def passes_complex_filter?(field, min_max, value)

@@ -12,11 +12,12 @@ class Searchbot::Sources::Base
     Searchbot::Results::Details.new( params )
   end
 
-  attr_reader :filters
+  attr_reader :filters, :seen
 
-  def initialize(filters)
+  def initialize(filters, opts = {})
     @filters = Filters.coerce( filters )
     @results = nil
+    @seen = Array(opts[:seen]) # Array of seen identifiers
   end
 
   def results
@@ -39,6 +40,7 @@ class Searchbot::Sources::Base
     listings_selector(doc).each do |raw|
       result = parse_single_result(raw)
       next unless result.passes_filters?(filters)
+      raise PreviouslySeen if seen.include?(result.id)
 
       @results << result
     end
@@ -75,18 +77,6 @@ class Searchbot::Sources::Base
       curr_page += 1
       break if max_pages && curr_page > max_pages
     end
-  end
-
-  def mark_all_seen
-    to_write = seen + unseen.map(&:id)
-
-    File.open(seen_file, "w") do |file|
-      file.puts to_write.uniq.join(',')
-    end
-  end
-
-  def seen
-    []  # NOT currently implemented
   end
 
   def unseen

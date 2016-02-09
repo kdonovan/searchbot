@@ -53,10 +53,8 @@ class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
         body: params_for_page(page).to_json
       )
 
-      JSON.parse( request.body )['d'].map do |json|
-        parse_single_listing(json)
-      end.select do |result|
-        result.passes_filters?(filters)
+      JSON.parse( request.body )['d'].map do |raw|
+        parse_single_listing(raw)
       end
     end
 
@@ -91,7 +89,13 @@ class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
         prev_length = @results.length
 
         begin
-          @results += parse_data_for_page(curr_page)
+          unfiltered_results = parse_data_for_page(curr_page)
+          unfiltered_results.select do |result|
+            result.passes_filters?(filters)
+          end.each do |result|
+            raise PreviouslySeen if seen.include?(result.id)
+            @results << result
+          end
         rescue PreviouslySeen
           break
         end

@@ -64,8 +64,6 @@ class Searchbot::Sources::BizBuySell < Searchbot::Sources::Base
     cashflow = info.at('.cflow')
     location = raw.at('.info') && raw.at('.info').text.strip
 
-    raise PreviouslySeen if seen.include?(id)
-
     Searchbot::Results::Listing.new(
       source_klass: self.class,
       id:         id,

@@ -6,11 +6,12 @@ module Searchbot::Utils::Parsing
   end
 
   def abbrev_to_state(abbrev)
-    STATES[abbrev]
+    STATES[abbrev.upcase]
   end
 
   def state_to_abbrev(full_name)
-    STATES.invert[full_name]
+    match = STATES.invert.detect {|full, abbrev| full.downcase == full_name.downcase }
+    match && match[1]
   end
 
   def state_alt_display(state)
