@@ -31,5 +31,6 @@ require "searchbot/results/listing"
 require "searchbot/sources/base"
 require "searchbot/sources/business_broker"
 require "searchbot/sources/biz_buy_sell"
+require "searchbot/sources/biz_quest"
 
 

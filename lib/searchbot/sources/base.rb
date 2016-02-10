@@ -101,4 +101,15 @@ class Searchbot::Sources::Base
     @unseen ||= results.reject {|result| seen.include?(result.id) }
   end
 
+  def map_id_for_state(state)
+    if state.to_s.length == 2
+      raise ArgumentError, "must provide full state name, not an abbreviation"
+    elsif respond_to?(:state_id_map, true)
+      state_id_map[state] || 0
+    else
+      raise "Must define #state_id_map in #{self.class.name} before calling #map_id_for_state"
+    end
+  end
+
+
 end

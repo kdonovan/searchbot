@@ -27,7 +27,7 @@ module Searchbot
     property :location
 
     def cashflow
-      self[:cashflow] || Array(self[:cashflow_from]).map {|k| self.class.str2i(k) }.reject {|v| v.zero? }.min
+      self[:cashflow_from] ? Array(self[:cashflow_from]).map {|k| self.class.str2i(k) }.reject {|v| v.zero? }.min : self[:cashflow]
     end
 
     def city

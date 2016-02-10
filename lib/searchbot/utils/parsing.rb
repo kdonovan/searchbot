@@ -29,6 +29,14 @@ module Searchbot::Utils::Parsing
     state_to_abbrev(state)
   end
 
+  def state_full(state)
+    if state.to_s.length == 2
+      abbrev_to_state(state)
+    else
+      STATES.values.include?(state) ? state : nil
+    end
+  end
+
   STATES = {
     'AK' => "Alaska",
     'AL' => "Alabama",
