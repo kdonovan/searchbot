@@ -34,3 +34,14 @@ require "searchbot/sources/biz_buy_sell"
 require "searchbot/sources/biz_quest"
 
 
+module Searchbot
+
+  def self.sources
+    [
+      Searchbot::Sources::BizBuySell,
+      Searchbot::Sources::BizQuest,
+      Searchbot::Sources::BusinessBroker,
+    ]
+  end
+
+end

@@ -3,12 +3,13 @@ class Searchbot::Sources::BizQuest < Searchbot::Sources::Base
   BASE_URL = "http://www.bizquest.com/Handlers/SearchRedirector.ashx"
 
   def url_for_page(page = nil)
-    redirected_base_search_url.tap do |url|
-      if page && page.to_i > 1
-        return url.sub(/\/buy-a-business-for-sale\//, "/buy-a-business-for-sale/page-#{page}/")
-      end
-    end
+    url = redirected_base_search_url
+    return url unless page && page.to_i > 1
+
+    url.sub(/-for-sale\//, "-for-sale/page-#{page}/")
   end
+
+  private
 
   def redirected_base_search_url
     @redirected_base_search_url ||= begin
@@ -100,24 +101,12 @@ class Searchbot::Sources::BizQuest < Searchbot::Sources::Base
       title:      sane( title ),
       location:   sane( location ),
       teaser:     sane( desc ),
-      location:   sane( location ),
     )
   end
 
-
-
-
-
-
-  # TODO: completed above here, now fill in the parse_result_details, then do specs
-
-
-
-
-
   def self.parse_result_details(listing, doc)
     info = doc.at('.listingDetail')
-    
+
     parse_dd_for = -> (dt_text) {
       dt_text += ':' unless dt_text[-1] == ':'
       if node = info.css('dt').detect {|n| n.text.strip == dt_text}
@@ -130,8 +119,10 @@ class Searchbot::Sources::BizQuest < Searchbot::Sources::Base
       if node = info.css('b.text-info').detect {|n| n.text.strip == "#{label}:"}
         node = node.next
         node = node.next until node.name.upcase == 'B'
-        val  = sane( node.text )
-        val == 'Not Disclosed' ? nil : val
+        unless node[:class].include?('no-info')
+          val = sane( node.text )
+          val =~ /Not Disclosed/ ? nil : val
+        end
       end
     }
 
@@ -157,7 +148,7 @@ class Searchbot::Sources::BizQuest < Searchbot::Sources::Base
       link:       listing.link,
       location:   listing.location,
       title:      listing.title,
-      
+
 
       price:          info_at['Asking Price'],
       revenue:        info_at['Gross Revenue'],
@@ -183,12 +174,13 @@ class Searchbot::Sources::BizQuest < Searchbot::Sources::Base
 
   def self.parse_section_after(doc, h3_text)
     return unless node = doc.css('h3').detect {|n| n.text == h3_text}
-    node = node.next
     sections = []
 
-    while node.name.upcase != 'H3'
-      sections << node.text if node.text.strip.length > 0
+    loop do 
       node = node.next
+      break if node.nil? || %w(H3 A).include?(node.name.upcase)
+      next if %w(A SCRIPT BR).include?(node.name.upcase)
+      sections << node.text if node.text.strip.length > 0
     end
 
     sections.join(divider).strip
@@ -253,3 +245,6 @@ class Searchbot::Sources::BizQuest < Searchbot::Sources::Base
   end
 
 end
+__END__
+
+Searchbot::Sources::BizQuest.new(min_price: 240_000, max_price: 260_000, state: 'Washington', city: 'Seattle').results.first

@@ -37,8 +37,7 @@ RSpec.shared_examples "a valid source" do |config|
 
       end
 
-      # %w(price cashflow revenue).each do |field|
-      %w(cashflow).each do |field|
+      %w(price cashflow revenue).each do |field|
         %w(min max).each do |direction|
 
           context "filters by #{direction} #{field}" do
@@ -60,7 +59,7 @@ RSpec.shared_examples "a valid source" do |config|
                   end
                 end
               end
-
+              
               expect(tested_one).to be true
             end
           end
