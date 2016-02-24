@@ -1,8 +1,12 @@
 module Searchbot::Utils::Parsing
 
-  def str2i(str)
-    return unless str && str.to_s.strip.length > 0
-    str.to_s.gsub(/[^\d.]/, '').to_i
+  def str2i(string)
+    return string if string.is_a?(Numeric)
+
+    str = string.to_s
+    return unless str && str.strip.length > 0
+    return if str =~ /\A\s*not disclosed\s*\z/i
+    str.gsub(/[^\d.]/, '').to_i
   end
 
   def abbrev_to_state(abbrev)

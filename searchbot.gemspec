@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Kali Donovan"]
   spec.email         = ["kali@deviantech.com"]
 
-  spec.summary       = %q{Automate searching various websites}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.summary       = %q{Automate searching various business listing websites}
+  spec.homepage      = "https://github.com/kdonovan/searchbot"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or

@@ -1,28 +1,23 @@
 # Searchbot
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/searchbot`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Searchbot is an adapter to various business listing websites, allowing searches to be automated and filters applied. It was created to scratch the very, very annoying itch of existing sites offering email alerts without any of the filters you'd actually care about if you were, you know, actually looking to buy a business.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'searchbot'
+gem 'searchbot', github: 'kdonovan/searchbot'
 ```
 
 And then execute:
 
     $ bundle
 
-Or install it yourself as:
-
-    $ gem install searchbot
 
 ## Usage
 
-TODO: Write usage instructions here
+Check the specs for intended usage.
 
 ## Development
 

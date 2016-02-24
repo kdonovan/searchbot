@@ -176,7 +176,7 @@ class Searchbot::Sources::BizQuest < Searchbot::Sources::Base
     return unless node = doc.css('h3').detect {|n| n.text == h3_text}
     sections = []
 
-    loop do 
+    loop do
       node = node.next
       break if node.nil? || %w(H3 A).include?(node.name.upcase)
       next if %w(A SCRIPT BR).include?(node.name.upcase)
@@ -245,6 +245,3 @@ class Searchbot::Sources::BizQuest < Searchbot::Sources::Base
   end
 
 end
-__END__
-
-Searchbot::Sources::BizQuest.new(min_price: 240_000, max_price: 260_000, state: 'Washington', city: 'Seattle').results.first
