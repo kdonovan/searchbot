@@ -72,13 +72,13 @@ class Searchbot::Sources::BizQuest < Searchbot::Sources::Base
     doc.css('#results .result:not(.srfranchise):not(.franchise):not(.broker)')
   end
 
-  def more_pages_available?(doc)
+  def more_pages_available?
     if pager = doc.at('ul.pagination')
       pager.css('li').last['class'] != 'active'
     end
   end
 
-  def parse_single_result(raw)
+  def single_result_data(raw)
     price    = raw.at('.price').at('.asking').text
     cashflow = if general = raw.at('.price').text.scan(/Cash Flow: \$(\S+)/)[0]
       general[0]
@@ -92,8 +92,7 @@ class Searchbot::Sources::BizQuest < Searchbot::Sources::Base
 
     location = raw.at('.price').css('a').select {|n| n.text != 'View Details' }.reverse.map(&:text).take(2).reverse.compact.join(', ')
 
-    Searchbot::Results::Listing.new(
-      source_klass: self.class,
+    {
       id:         id,
       price:      price,
       cashflow:   cashflow,
@@ -101,10 +100,10 @@ class Searchbot::Sources::BizQuest < Searchbot::Sources::Base
       title:      sane( title ),
       location:   sane( location ),
       teaser:     sane( desc ),
-    )
+    }
   end
 
-  def self.parse_result_details(listing, doc)
+  def single_result_details(listing, doc)
     info = doc.at('.listingDetail')
 
     parse_dd_for = -> (dt_text) {
@@ -143,14 +142,7 @@ class Searchbot::Sources::BizQuest < Searchbot::Sources::Base
       end
     end
 
-    params = {
-      id:         listing.id,
-      link:       listing.link,
-      location:   listing.location,
-      title:      listing.title,
-
-
-      price:          info_at['Asking Price'],
+    {
       revenue:        info_at['Gross Revenue'],
 
       ffe:            info_at['FF&E'],
@@ -172,7 +164,7 @@ class Searchbot::Sources::BizQuest < Searchbot::Sources::Base
     end
   end
 
-  def self.parse_section_after(doc, h3_text)
+  def parse_section_after(doc, h3_text)
     return unless node = doc.css('h3').detect {|n| n.text == h3_text}
     sections = []
 

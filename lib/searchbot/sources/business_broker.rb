@@ -63,8 +63,7 @@ class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
         json[field] == 'Not Disclosed' ? nil : json[field]
       }
 
-      Searchbot::Results::Listing.new(
-        source_klass: self.class,
+      {
         price:      get['Price'],
         cashflow:   get['CashFlow'],
         revenue:    get['YearlyRevenue'],
@@ -74,7 +73,7 @@ class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
         id:         get['ListID'].to_s,
         city:       sane( get['City'] ),
         state:      sane( get['State'] ),
-      )
+      }
     end
 
     def retrieve_results
@@ -103,7 +102,7 @@ class Searchbot::Sources::BusinessBroker < Searchbot::Sources::Base
       end
     end
 
-    def self.parse_result_details(listing, doc)
+    def single_result_details(listing, doc)
       get = -> (path) {
         if doc.at("##{path}")
           raw = doc.at("##{path}").text

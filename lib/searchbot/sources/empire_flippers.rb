@@ -22,19 +22,22 @@ class Searchbot::Sources::EmpireFlippers < Searchbot::Sources::Base
       JSON.parse(section[1]).map do |raw|
         next unless raw['listing_status'] == 'for_sale'
 
-        Searchbot::Results::Listing.new(
-          source_klass: self.class,
-          price:        raw['price'].to_i,
-          cashflow:     raw['net_profit'].to_i * 12,
-          title:        [raw['monetization'], raw['niche']].join(' // '),
-          link:         "https://empireflippers.com/listing/#{raw['listing_id']}/",
-          id:           raw['listing_id'].to_s,
-          teaser:       "Created: #{raw['date_created']}. Posted: #{raw['post_date']}.",
-        )
+        parse_single_result(raw)
       end.compact
     end
 
-    def self.parse_result_details(listing, doc)
+    def single_result_data(raw)
+      {
+        price:        raw['price'].to_i,
+        cashflow:     raw['net_profit'].to_i * 12,
+        title:        [raw['monetization'], raw['niche']].join(' // '),
+        link:         "https://empireflippers.com/listing/#{raw['listing_id']}/",
+        id:           raw['listing_id'].to_s,
+        teaser:       "Created: #{raw['date_created']}. Posted: #{raw['post_date']}.",
+      }
+    end
+
+    def single_result_details(listing, doc)
       reason = if h3 = doc.css('.listing--content h3').detect {|n| n.text == 'Reason for Sale'}
         h3.next.text
       end

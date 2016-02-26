@@ -10,8 +10,12 @@ RSpec.shared_examples "a valid source" do |config|
 
   context "shared specs" do
     let(:filters) { Filters.new(min_cashflow: 100_000) }
-    let(:source)  { config[:source].new(filters).tap {|s| s.max_pages = config[:max_pages] || 1 } }
-    let(:results) { source.results }
+    let(:source)  do
+      config[:source].new(filters, config[:source_options] || {}).tap do |s|
+        s.max_pages = config[:max_pages] || 1
+      end
+    end
+    let(:results) { source.listings }
 
     context "faked", vcr: {match_requests_on: [:method, :uri, :body]} do
 

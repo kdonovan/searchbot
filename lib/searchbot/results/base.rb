@@ -3,7 +3,7 @@ module Searchbot
     include Hashie::Extensions::Dash::PropertyTranslation
     extend Utils::Parsing
 
-    property :source_klass
+    property :source
 
     property :id,      required: true
     property :link,    required: true
@@ -18,9 +18,11 @@ module Searchbot
     property :city
     property :state
 
+    property :listed_at
+
     # We don't want to report it, but keep the raw HTML or JSON internally for examination
     # later (e.g. for FEInternational, can determine detail from raw listing alone)
-    property :raw
+    property :raw_listing
 
     # Many sites have cashflow and/or EBITDA and/or net profit, and brokers
     # don't use them consistently. Go with the lowest non-zero number.
@@ -82,6 +84,7 @@ module Searchbot
         raw.delete(:cashflow_from)
 
         raw.delete(:raw)
+        raw.delete(:raw_details)
       end
     end
 

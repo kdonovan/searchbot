@@ -15,11 +15,11 @@ class Searchbot::Sources::FEInternational < Searchbot::Sources::Base
     doc.css('#tabs-1 div.listing')
   end
 
-  def more_pages_available?(doc)
+  def more_pages_available?
     nil
   end
 
-  def parse_single_result(raw)
+  def single_result_data(raw)
     title_node = raw.at('h2.listing-title a')
     link  = title_node['href']
     id    = link.split('/').last.split('-').first
@@ -33,10 +33,7 @@ class Searchbot::Sources::FEInternational < Searchbot::Sources::Base
 
     desc = desc.join(self.class.divider)
 
-    Searchbot::Results::Listing.new(
-      source_klass: self.class,
-      raw:          raw,
-
+    {
       id:          id,
       price:       raw.at('.listing-overview-item--asking-price').text,
       revenue:     raw.at('.listing-overview-item--yearly-revenue').text,
@@ -44,7 +41,7 @@ class Searchbot::Sources::FEInternational < Searchbot::Sources::Base
       link:        link,
       title:       sane( title_node.text ),
       teaser:      desc,
-    )
+    }
   end
 
   def self.result_details(listing)

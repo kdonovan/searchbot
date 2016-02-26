@@ -1,6 +1,8 @@
 require 'hashie'
 require 'nokogiri'
 require 'httparty'
+require 'dotenv'
+Dotenv.load
 
 begin
   require 'pry'
@@ -10,42 +12,77 @@ end
 class PreviouslySeen < StandardError; end
 
 
+require "searchbot/version"
+require "searchbot/inflectors"
+
+
+SOURCES = %w(biz_buy_sell website_closers)
+
 module Searchbot
+  module Generic; end
+
+  module Results; end
+
+  module Utils; end
+
   module Sources
-  end
-
-  module Results
-  end
-
-  module Utils
+    SOURCES.each do |source|
+      const_set( Inflectors.camelize(source), Module.new)
+    end
   end
 end
 
 
-require "searchbot/version"
 require "searchbot/utils/parsing"
+require "searchbot/utils/web"
 require "searchbot/filters"
 require "searchbot/results/base"
 require "searchbot/results/details"
 require "searchbot/results/listing"
+
+require "searchbot/generic/searcher"
+require "searchbot/generic/parser"
+require "searchbot/generic/listings_page"
+require "searchbot/generic/listing_parser"
+require "searchbot/generic/detail_parser"
+
+SOURCES.each do |source|
+  require "searchbot/sources/#{source}/searcher"
+  require "searchbot/sources/#{source}/listings_page"
+  require "searchbot/sources/#{source}/listing_parser"
+  require "searchbot/sources/#{source}/detail_parser"
+end
+
 require "searchbot/sources/base"
 require "searchbot/sources/business_broker"
-require "searchbot/sources/biz_buy_sell"
 require "searchbot/sources/biz_quest"
 
 require "searchbot/sources/empire_flippers"
-require "searchbot/sources/website_closers"
 require "searchbot/sources/f_e_international"
+require "searchbot/sources/latonas"
 
 
 module Searchbot
 
-  def self.sources
+  def self.business_sources
     [
       Searchbot::Sources::BizBuySell,
       Searchbot::Sources::BizQuest,
       Searchbot::Sources::BusinessBroker,
     ]
+  end
+
+  def self.website_sources
+    [
+      Searchbot::Sources::EmpireFlippers,
+      Searchbot::Sources::WebsiteClosers,
+      Searchbot::Sources::FEInternational,
+      Searchbot::Sources::Latonas,
+    ]
+  end
+
+  def self.sources
+    business_sources + website_sources
   end
 
 end

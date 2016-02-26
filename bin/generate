@@ -1,0 +1,102 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+require_relative "../lib/searchbot/inflectors"
+
+raise ArgumentError, "I only know how to generate new sources at this point" unless ARGV[0] == 'source'
+
+src = ARGV[1]
+
+if src.chars.select {|c| c.match /[a-z]/i }.any? {|c| c == c.capitalize }
+  raise ArgumentError, "Source names must be underscored (e.g. biz_buy_sell)"
+end
+
+under_src = src
+
+camel_src = Searchbot::Inflectors.camelize(src)
+puts "Generating files for new source: #{camel_src}"
+
+ROOT = File.expand_path(__FILE__ + '/../..')
+DIR_PATH = "lib/searchbot/sources/#{under_src}"
+DIR  = [ROOT, DIR_PATH].join('/')
+
+def create_file(path, contents)
+  full_path = File.expand_path(ROOT + '/' + path)
+
+  if File.exists?(full_path)
+    puts "* WARNING: #{path} exists, skipping"
+  else
+    puts "* OK: generating #{path}"
+    File.open(full_path, 'w') {|f| f.puts contents }
+  end
+end
+
+def create_src_file(path, contents)
+  path = [DIR_PATH, path].join('/')
+  create_file(path, contents)
+end
+
+
+FileUtils.mkdir_p(DIR)
+
+create_src_file "detail_parser.rb", <<-EOS
+class Searchbot::Sources::#{camel_src}::DetailParser < Searchbot::Generic::DetailParser
+
+  def parse
+
+    {
+
+    }
+  end
+
+end
+EOS
+
+create_src_file "listing_parser.rb", <<-EOS
+class Searchbot::Sources::#{camel_src}::ListingParser < Searchbot::Generic::ListingParser
+
+  def parse
+
+    {
+
+    }
+  end
+
+end
+EOS
+
+create_src_file "listings_page.rb", <<-EOS
+class Searchbot::Sources::#{camel_src}::ListingsPage < Searchbot::Generic::ListingsPage
+
+  def listings_selector
+  end
+
+  def more_pages_available?
+  end
+
+end
+EOS
+
+create_src_file "searcher.rb", <<-EOS
+class Searchbot::Sources::#{camel_src}::Searcher < Searchbot::Generic::Searcher
+
+  def url_for_page(page = nil)
+  end
+
+end
+EOS
+
+
+create_file "spec/sources/#{under_src}_spec.rb", <<-EOS
+require 'spec_helper'
+require 'sources/shared_specs'
+
+describe Searchbot::Sources::#{camel_src}::Searcher do
+
+  it_behaves_like 'a valid business source', source: Searchbot::Sources::#{camel_src}::Searcher, expected_results: {
+    Integer => [:cashflow, :price],
+    String  => [:id, :title, :teaser, :link]
+  }
+
+end
+EOS

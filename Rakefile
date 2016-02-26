@@ -7,4 +7,3 @@ end
 
 task :default => :spec
 
-
