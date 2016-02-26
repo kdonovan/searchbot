@@ -77,7 +77,4 @@ class Searchbot::Sources::BizQuest::DetailParser < Searchbot::Generic::DetailPar
     sections.join( divider ).strip
   end
 
-  def divider
-    source.class.divider
-  end
 end

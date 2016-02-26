@@ -11,4 +11,8 @@ class Searchbot::Generic::DetailParser < Searchbot::Generic::Parser
 
   private
 
+  def divider
+    source.class.divider
+  end
+
 end
