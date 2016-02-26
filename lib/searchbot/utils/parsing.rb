@@ -1,6 +1,10 @@
 module Searchbot::Utils::Parsing
 
   def str2i(string)
+    Searchbot::Utils::Parsing.str2i(string)
+  end
+
+  def self.str2i(string)
     return string if string.is_a?(Numeric)
 
     str = string.to_s

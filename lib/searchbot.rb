@@ -33,6 +33,8 @@ require "searchbot/sources/business_broker"
 require "searchbot/sources/biz_buy_sell"
 require "searchbot/sources/biz_quest"
 
+require "searchbot/sources/empire_flippers"
+
 
 module Searchbot
 

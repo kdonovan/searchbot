@@ -1,7 +1,15 @@
+RSpec.shared_examples "a valid website source" do |config|
+  it_behaves_like "a valid source", config
+end
+
+RSpec.shared_examples "a valid business source" do |config|
+  it_behaves_like "a valid source", config.merge(filter_location: true)
+end
+
 RSpec.shared_examples "a valid source" do |config|
 
   context "shared specs" do
-    let(:filters) { Filters.new(min_cashflow: 300_000, state: 'Washington') }
+    let(:filters) { Filters.new(min_cashflow: 100_000) }
     let(:source)  { config[:source].new(filters).tap {|s| s.max_pages = 1 } }
     let(:results) { source.results }
 
@@ -45,13 +53,13 @@ RSpec.shared_examples "a valid source" do |config|
 
             it "correctly" do
               key = "#{direction}_#{field}".to_sym
-              tested_one = nil
+              tested = 0
 
               results.each do |result|
                 result = result.detail if filters.detail_only?(key)
 
                 if val = result.send(field)
-                  tested_one = true
+                  tested += 1
                   if direction == 'min'
                     expect(val).to be >= filters.send(key)
                   else
@@ -59,40 +67,42 @@ RSpec.shared_examples "a valid source" do |config|
                   end
                 end
               end
-              
-              expect(tested_one).to be true
+
+              expect(tested).to be > 0
             end
           end
 
         end
       end
 
-      context "filters by state" do
 
-        it "correctly" do
-          results.each do |result|
-            expect(result.state).to eq 'WA'
-          end
+      if config[:filter_location]
+        context "filters by state" do
+
+          let(:filters) { Filters.new(min_cashflow: 100_000, state: 'Washington') }
+
+          # it "correctly" do
+          #   results.each do |result|
+          #     expect(result.state).to eq 'WA'
+          #   end
+          # end
+
         end
 
-      end
+        context "filters by city" do
 
-      context "filters by city" do
+          let(:filters) { Filters.new(min_cashflow: 100_000, state: 'Washington', city: 'Seattle') }
 
-        let(:filters) { Filters.new(min_cashflow: 100_000, state: 'Washington', city: 'Seattle') }
-
-        it "correctly" do
-          results.each do |result|
-            expect(result.state).to eq 'WA'
-            expect(result.city).to match /Seattle/i
+          it "correctly" do
+            results.each do |result|
+              expect(result.state).to eq 'WA'
+              expect(result.city).to match /Seattle/i
+            end
           end
+
         end
-
       end
-
 
     end
-
-
   end
 end

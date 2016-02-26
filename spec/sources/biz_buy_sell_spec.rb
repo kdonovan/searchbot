@@ -3,7 +3,7 @@ require 'sources/shared_specs'
 
 describe Searchbot::Sources::BizBuySell do
 
-  it_behaves_like 'a valid source', source: Searchbot::Sources::BizBuySell, expected_results: {
+  it_behaves_like 'a valid business source', source: Searchbot::Sources::BizBuySell, expected_results: {
     Integer => [:cashflow, :price],
     String  => [:id, :title, :teaser, :link]
   }

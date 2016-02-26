@@ -10,4 +10,7 @@ class Searchbot::Results::Details < Searchbot::Results::Base
   property :seller_financing
   property :reason_selling
 
+  # Websites
+  property :hours_required
+
 end

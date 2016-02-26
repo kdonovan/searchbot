@@ -18,7 +18,6 @@ module Searchbot
     property :city
     property :state
 
-
     # Many sites have cashflow and/or EBITDA and/or net profit, and brokers
     # don't use them consistently. Go with the lowest non-zero number.
     property :cashflow_from
