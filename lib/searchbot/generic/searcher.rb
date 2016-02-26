@@ -1,4 +1,5 @@
 class Searchbot::Generic::Searcher
+  include Searchbot::Utils::Web
 
   # When set (e.g. testing), limits results to this many pages
   attr_accessor :max_pages
