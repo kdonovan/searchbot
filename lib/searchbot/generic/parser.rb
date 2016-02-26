@@ -1,31 +1,38 @@
 class Searchbot::Generic::Parser
   include Searchbot::Utils::Web
 
-  attr_reader :doc, :html, :source, :context
+  attr_reader :source, :context, :url
 
-  def initialize(html: nil, source:, context: , url: nil)
+  # If given HTML or Nokogiri, will process that. Otherwise, will pull from URL
+  def initialize(html: nil, source:, context: , url: nil, options: {})
     @context = context
     @source = source
+    @url = url
 
-    html = fetch(url) if html.nil?
+    if html
+      @html = html.respond_to?(:to_html) ? html.to_html : html
+    end
 
-    @html = html.respond_to?(:to_html) ? html.to_html : html
-    @doc  = html.respond_to?(:to_html) ? html : Nokogiri::HTML(html)
+    raise ArgumentError, "must provide either :html or :url" unless html || url
   end
-
-
 
   def result
     raise "Must be implemented in Searchbot::Generic::XXX subclasses"
   end
 
   def parse
-    raise "Must be implemented in Searchbot::Sources::YYY::XxxParser subclasses"
+    raise "#parse must implemented in Searchbot::Sources::YYY::XxxParser subclasses (called from #{self.class.name})"
+  end
+
+  def html
+    @html ||= fetch(url)
+  end
+
+  def doc
+    @doc ||= html.respond_to?(:to_html) ? html : Nokogiri::HTML(html)
   end
 
   protected
-
-
 
   # Hook for subclasses to narrow down scope
   def prepare_doc(string)
@@ -43,5 +50,8 @@ class Searchbot::Generic::Parser
     end
   end
 
+  def divider
+    source.class.divider
+  end
 
 end

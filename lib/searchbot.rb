@@ -16,7 +16,7 @@ require "searchbot/version"
 require "searchbot/inflectors"
 
 
-SOURCES = %w(biz_buy_sell website_closers biz_quest latonas)
+SOURCES = %w(biz_buy_sell website_closers biz_quest latonas f_e_international)
 
 module Searchbot
   module Generic; end
@@ -55,7 +55,6 @@ end
 
 require "searchbot/sources/base"
 require "searchbot/sources/business_broker"
-require "searchbot/sources/f_e_international"
 require "searchbot/sources/empire_flippers"
 
 

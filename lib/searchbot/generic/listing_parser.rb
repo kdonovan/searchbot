@@ -2,11 +2,15 @@
 class Searchbot::Generic::ListingParser < Searchbot::Generic::Parser
 
   def result
-    params = {source: source, raw_listing: html}.merge( parse )
+    params = parser_options.merge( parse )
 
     Searchbot::Results::Listing.new( params )
   end
 
   private
+
+  def parser_options
+    {source: source, raw_listing: html}
+  end
 
 end

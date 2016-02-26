@@ -3,7 +3,7 @@ class Searchbot::Generic::DetailParser < Searchbot::Generic::Parser
 
   def result
     params = context.to_hash
-      .merge(source: source, raw_details: html)
+      .merge( parser_options )
       .merge( parse )
 
     Searchbot::Results::Details.new( params )
@@ -11,8 +11,8 @@ class Searchbot::Generic::DetailParser < Searchbot::Generic::Parser
 
   private
 
-  def divider
-    source.class.divider
+  def parser_options
+    {source: source, raw_details: html}
   end
 
 end
