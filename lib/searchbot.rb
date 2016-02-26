@@ -35,6 +35,7 @@ require "searchbot/sources/biz_quest"
 
 require "searchbot/sources/empire_flippers"
 require "searchbot/sources/website_closers"
+require "searchbot/sources/f_e_international"
 
 
 module Searchbot

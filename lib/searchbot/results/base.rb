@@ -18,6 +18,10 @@ module Searchbot
     property :city
     property :state
 
+    # We don't want to report it, but keep the raw HTML or JSON internally for examination
+    # later (e.g. for FEInternational, can determine detail from raw listing alone)
+    property :raw
+
     # Many sites have cashflow and/or EBITDA and/or net profit, and brokers
     # don't use them consistently. Go with the lowest non-zero number.
     property :cashflow_from
@@ -67,6 +71,7 @@ module Searchbot
     end
 
     # Modify reported keys to include those created from others (e.g. location, cashflow_from)
+    # and hide those we don't want to show (e.g. raw, the raw source data)
     def keys
       super.tap do |raw|
         raw << :city  if city  && !raw.index(:city)
@@ -75,6 +80,8 @@ module Searchbot
 
         raw << :cashflow if cashflow && !raw.index(:cashflow)
         raw.delete(:cashflow_from)
+
+        raw.delete(:raw)
       end
     end
 
