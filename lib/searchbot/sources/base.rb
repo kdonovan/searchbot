@@ -64,19 +64,29 @@ class Searchbot::Sources::Base
     end
   end
 
-  # TODO: this is often a slow point, and depending on how nice we want
-  # to be to the backends, could be parallelized
-  def self.parse_result_details(listing, doc)
+
+  def url_for_page
     raise "Must be implemented in child class"
   end
 
-  def url_for_page
+  def listings_selector(doc)
+    raise "Must be implemented in child class"
+  end
+
+  def more_pages_available?(doc)
     raise "Must be implemented in child class"
   end
 
   def parse_single_result(raw)
     raise "Must be implemented in child class"
   end
+
+  # TODO: this is often a slow point, and depending on how nice we want
+  # to be to the backends, could be parallelized
+  def self.parse_result_details(listing, doc)
+    raise "Must be implemented in child class"
+  end
+
 
   def retrieve_results
     @results = []

@@ -34,6 +34,7 @@ require "searchbot/sources/biz_buy_sell"
 require "searchbot/sources/biz_quest"
 
 require "searchbot/sources/empire_flippers"
+require "searchbot/sources/website_closers"
 
 
 module Searchbot
