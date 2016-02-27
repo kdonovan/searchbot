@@ -1,7 +1,9 @@
 class Searchbot::Sources::BizBuySell::Searcher < Searchbot::Generic::Searcher
   # Note that this site appears to require a known UserAgent.
 
-  BASE_URL = "http://www.bizbuysell.com/listings/handlers/searchresultsredirector.ashx"
+  def base_url
+    "http://www.bizbuysell.com/listings/handlers/searchresultsredirector.ashx"
+  end
 
   def url_for_page(page = nil)
     params = {
@@ -44,7 +46,7 @@ class Searchbot::Sources::BizBuySell::Searcher < Searchbot::Generic::Searcher
 
     params['pg'] = page unless page.nil?
 
-    [BASE_URL, params.map {|k, v| [k, v].join('=')}.join('&')].join('?')
+    [base_url, params.map {|k, v| [k, v].join('=')}.join('&')].join('?')
   end
 
 end

@@ -15,8 +15,7 @@ class PreviouslySeen < StandardError; end
 require "searchbot/version"
 require "searchbot/inflectors"
 
-
-SOURCES = %w(biz_buy_sell business_broker website_closers biz_quest latonas f_e_international empire_flippers)
+SOURCES = %w(biz_buy_sell biz_quest business_broker empire_flippers f_e_international latonas website_closers)
 
 module Searchbot
   module Generic; end
@@ -32,7 +31,6 @@ module Searchbot
   end
 end
 
-
 require "searchbot/utils/parsing"
 require "searchbot/utils/web"
 require "searchbot/filters"
@@ -41,20 +39,17 @@ require "searchbot/results/details"
 require "searchbot/results/listing"
 
 require "searchbot/generic/concerns/html"
-require "searchbot/generic/searcher"
 require "searchbot/generic/parser"
-require "searchbot/generic/listings_page"
-require "searchbot/generic/listing_parser"
-require "searchbot/generic/detail_parser"
+
+common = %w(searcher listings_page listing_parser detail_parser)
+
+common.each {|file| require "searchbot/generic/#{file}" }
 
 SOURCES.each do |source|
-  require "searchbot/sources/#{source}/searcher"
-  require "searchbot/sources/#{source}/listings_page"
-  require "searchbot/sources/#{source}/listing_parser"
-  require "searchbot/sources/#{source}/detail_parser"
+  common.each do |file|
+    require "searchbot/sources/#{source}/#{file}"
+  end
 end
-
-require "searchbot/sources/base"
 
 
 module Searchbot

@@ -30,7 +30,7 @@ class Searchbot::Sources::BizQuest::ListingParser < Searchbot::Generic::ListingP
 
   def link
     @link ||= begin
-      base = source.redirected_base_search_url
+      base = page.searcher.redirected_base_search_url
       relative = title_node['href']
       absolute = URI.join(base, relative)
       absolute.to_s.split('?')[0]

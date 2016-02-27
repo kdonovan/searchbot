@@ -4,7 +4,7 @@ class Searchbot::Sources::Latonas::DetailParser < Searchbot::Generic::DetailPars
     # Note: lots more custom stats we could pull in if desired. And graphs!
     {
       description:    description,
-      business_url:   url,
+      business_url:   business_url,
       established:    established,
     }
   end
@@ -38,7 +38,7 @@ class Searchbot::Sources::Latonas::DetailParser < Searchbot::Generic::DetailPars
     end
   end
 
-  def url
+  def business_url
     if node = doc.css('a').detect {|l| l.text == 'Visit Site' }
       node['href']
     end
