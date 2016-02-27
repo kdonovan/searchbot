@@ -1,8 +1,7 @@
 module Searchbot::Utils::Web
 
   def fetch(url)
-    html = HTTParty.get(url, headers: headers).body
-    Nokogiri::HTML( html )
+    HTTParty.get(url, headers: headers).body
   end
 
   def fetch_json(url, params)

@@ -1,4 +1,5 @@
 class Searchbot::Generic::ListingsPage
+  include Searchbot::Generic::Concerns::Html
   include Searchbot::Utils::Web
 
   attr_reader :url, :searcher, :options
@@ -22,10 +23,6 @@ class Searchbot::Generic::ListingsPage
   end
 
   private
-
-  def doc
-    @doc ||= fetch(url)
-  end
 
   def parse_raw_listing(raw)
     searcher.listing_parser.new(html: raw, page: self).result

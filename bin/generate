@@ -72,6 +72,7 @@ class Searchbot::Sources::#{camel_src}::ListingsPage < Searchbot::Generic::Listi
   end
 
   def more_pages_available?
+    raise "more_pages_available? must be implemented in #{self.class.name}"
   end
 
 end

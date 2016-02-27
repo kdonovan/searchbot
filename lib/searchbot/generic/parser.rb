@@ -1,4 +1,5 @@
 class Searchbot::Generic::Parser
+  include Searchbot::Generic::Concerns::Html
   include Searchbot::Utils::Web
 
   attr_reader :url
@@ -20,14 +21,6 @@ class Searchbot::Generic::Parser
 
   def parse
     raise "#parse must implemented in Searchbot::Sources::YYY::XxxParser subclasses (called from #{self.class.name})"
-  end
-
-  def html
-    @html ||= fetch(url)
-  end
-
-  def doc
-    @doc ||= html.respond_to?(:to_html) ? html : Nokogiri::HTML(html)
   end
 
   protected

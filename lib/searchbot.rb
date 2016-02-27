@@ -16,7 +16,7 @@ require "searchbot/version"
 require "searchbot/inflectors"
 
 
-SOURCES = %w(biz_buy_sell business_broker website_closers biz_quest latonas f_e_international)
+SOURCES = %w(biz_buy_sell business_broker website_closers biz_quest latonas f_e_international empire_flippers)
 
 module Searchbot
   module Generic; end
@@ -40,6 +40,7 @@ require "searchbot/results/base"
 require "searchbot/results/details"
 require "searchbot/results/listing"
 
+require "searchbot/generic/concerns/html"
 require "searchbot/generic/searcher"
 require "searchbot/generic/parser"
 require "searchbot/generic/listings_page"
@@ -54,7 +55,6 @@ SOURCES.each do |source|
 end
 
 require "searchbot/sources/base"
-require "searchbot/sources/empire_flippers"
 
 
 module Searchbot
