@@ -1,19 +1,19 @@
 class Searchbot::Generic::ListingsPage
   include Searchbot::Utils::Web
 
-  attr_reader :url, :searcher
+  attr_reader :url, :searcher, :options
 
-  def initialize(url:, searcher:)
-    @url, @searcher = url, searcher
+  def initialize(url:, searcher:, options: {})
+    @url, @searcher, @options = url, searcher, options
   end
 
   def listings
-    listings_selector.map do |raw|
-      searcher.listing_parser.new(html: raw, context: self, source: searcher).result
+    raw_listings.map do |raw|
+      parse_raw_listing(raw)
     end
   end
 
-  def listings_selector
+  def raw_listings
     raise "Must be implemented in subclasses"
   end
 
@@ -25,6 +25,10 @@ class Searchbot::Generic::ListingsPage
 
   def doc
     @doc ||= fetch(url)
+  end
+
+  def parse_raw_listing(raw)
+    searcher.listing_parser.new(html: raw, page: self).result
   end
 
 end

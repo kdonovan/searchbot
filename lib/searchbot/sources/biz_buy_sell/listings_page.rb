@@ -1,6 +1,6 @@
 class Searchbot::Sources::BizBuySell::ListingsPage < Searchbot::Generic::ListingsPage
 
-  def listings_selector
+  def raw_listings
     doc.css('a[data-listnumber]')
   end
 

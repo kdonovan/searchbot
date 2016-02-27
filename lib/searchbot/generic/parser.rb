@@ -1,12 +1,10 @@
 class Searchbot::Generic::Parser
   include Searchbot::Utils::Web
 
-  attr_reader :source, :context, :url
+  attr_reader :url
 
   # If given HTML or Nokogiri, will process that. Otherwise, will pull from URL
-  def initialize(html: nil, source:, context: , url: nil, options: {})
-    @context = context
-    @source = source
+  def initialize(html: nil, url: nil, options: {})
     @url = url
 
     if html
@@ -51,7 +49,7 @@ class Searchbot::Generic::Parser
   end
 
   def divider
-    source.class.divider
+    "\n\n\n"
   end
 
 end

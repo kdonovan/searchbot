@@ -68,7 +68,7 @@ EOS
 create_src_file "listings_page.rb", <<-EOS
 class Searchbot::Sources::#{camel_src}::ListingsPage < Searchbot::Generic::ListingsPage
 
-  def listings_selector
+  def raw_listings
   end
 
   def more_pages_available?

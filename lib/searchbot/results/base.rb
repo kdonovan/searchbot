@@ -3,7 +3,7 @@ module Searchbot
     include Hashie::Extensions::Dash::PropertyTranslation
     extend Utils::Parsing
 
-    property :source
+    property :searcher
 
     property :id,      required: true
     property :link,    required: true

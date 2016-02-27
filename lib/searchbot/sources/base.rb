@@ -84,7 +84,7 @@ class Searchbot::Sources::Base
   end
 
   def parse_results_page(doc)
-    listings_selector(doc).each do |raw|
+    raw_listings(doc).each do |raw|
       result = parse_single_result(raw)
       next unless result.passes_filters?(filters)
       raise PreviouslySeen if seen.include?(result.id)
@@ -103,7 +103,7 @@ class Searchbot::Sources::Base
     raise "Must be implemented in child class"
   end
 
-  def listings_selector(doc)
+  def raw_listings(doc)
     raise "Must be implemented in child class"
   end
 

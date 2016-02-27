@@ -2,7 +2,7 @@ class Searchbot::Sources::WebsiteClosers::ListingsPage < Searchbot::Generic::Lis
 
   attr_reader :seen_sold_listing
 
-  def listings_selector
+  def raw_listings
     doc.css('.listing ul')
   end
 

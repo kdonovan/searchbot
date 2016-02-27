@@ -52,31 +52,15 @@ class Searchbot::Generic::Searcher
     # Hook for subclasses to add special options handling
   end
 
-  def self.divider
-    "\n\n\n"
-  end
-
   def url_for_page
     raise "Must be implemented in child class"
   end
 
-  def listings_selector(doc)
+  def raw_listings(doc)
     raise "Must be implemented in child class"
   end
 
   def more_pages_available?
-    raise "Must be implemented in child class"
-  end
-
-  def single_result_data(raw)
-    raise "Must be implemented in child class"
-  end
-
-  # TODO: this is often a slow point, since it usually
-  # requires a secondary web request for each listing,
-  # so depending on how nice we want to be to the backends
-  # it could possibly be parallelized.
-  def single_result_details(listing, doc)
     raise "Must be implemented in child class"
   end
 
@@ -87,7 +71,7 @@ class Searchbot::Generic::Searcher
 
     while more_pages do
       curr_page += 1
-      page = listings_page.new( url: url_for_page(curr_page), searcher: self )
+      page = listings_page_for( curr_page )
 
       page.listings.each do |listing|
         next unless listing.passes_filters?(filters)
@@ -99,6 +83,10 @@ class Searchbot::Generic::Searcher
       more_pages = page.more_pages_available?
       break if max_pages && curr_page > max_pages
     end
+  end
+
+  def listings_page_for(page)
+    listings_page.new( url: url_for_page(page), searcher: self )
   end
 
   def unseen

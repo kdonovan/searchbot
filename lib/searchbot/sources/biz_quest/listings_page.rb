@@ -1,6 +1,6 @@
 class Searchbot::Sources::BizQuest::ListingsPage < Searchbot::Generic::ListingsPage
 
-  def listings_selector
+  def raw_listings
     doc.css('#results .result:not(.srfranchise):not(.franchise):not(.broker)')
   end
 

@@ -5,6 +5,16 @@ module Searchbot::Utils::Web
     Nokogiri::HTML( html )
   end
 
+  def fetch_json(url, params)
+    response = HTTParty.post(
+      url,
+      headers: headers.merge('Content-Type' => 'application/json; charset=UTF-8'),
+      body: params.to_json
+    )
+
+    JSON.parse( response.body )
+  end
+
   private
 
   FIREFOX = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:43.0) Gecko/20100101 Firefox/43.0'
