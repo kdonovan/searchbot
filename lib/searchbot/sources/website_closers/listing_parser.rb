@@ -1,7 +1,5 @@
 class Searchbot::Sources::WebsiteClosers::ListingParser < Searchbot::Generic::ListingParser
 
-  attr_reader :seen_sold_listing
-
   def parse
     info = doc.at('.disc_box')
     title_node = info.at('span:first-child a')
@@ -9,7 +7,7 @@ class Searchbot::Sources::WebsiteClosers::ListingParser < Searchbot::Generic::Li
     cashf_node = info.at('span:nth-child(3)')
 
     unless price_node.at('strong').text == 'Available'
-      context.seen_sold_listing = true
+      page.seen_sold_listing = true
       return nil
     end
 

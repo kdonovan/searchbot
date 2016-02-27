@@ -8,39 +8,48 @@ end
 
 RSpec.shared_examples "a valid source" do |config|
 
+  vcr_opts = {match_requests_on: [:method, :uri, :body]}
+
+  cname = ->(name) {
+    [config[:searcher].name.gsub('::', '_'), name].join('/')
+  }
+
   context "shared specs" do
     let(:filters) { Filters.new(min_cashflow: 100_000) }
-    let(:source)  do
-      config[:source].new(filters, config[:source_options] || {}).tap do |s|
+    let(:searcher)  do
+      config[:searcher].new(filters).tap do |s|
         s.max_pages = config[:max_pages] || 1
       end
     end
-    let(:results) { source.listings }
+    let(:results) { searcher.listings }
 
-    context "faked", vcr: {match_requests_on: [:method, :uri, :body]} do
+    context "faked", vcr: vcr_opts, focus: true do
 
-      it 'returns results' do
-        expect(results.length).not_to eq(0)
-        expect(results.first).to be_a Searchbot::Results::Listing
-      end
+      context "listing", vcr: vcr_opts.merge(cassette_name: cname['listing']) do
+        it 'returns results' do
+          expect(results.length).not_to eq(0)
+          expect(results.first).to be_a Searchbot::Results::Listing
+        end
 
-      context "result" do
-        let(:result) { results.first }
+        context "result" do
+          let(:result) { results.first }
 
-        config[:expected_results].each do |klass, keys|
-          keys.each do |key|
-            it "has valid #{key}" do
-              val = result.send(key)
-              expect(val.nil?).to be false
-              expect(val.to_s).not_to eq ''
-              expect(klass === val).to be true
+          config[:expected_results].each do |klass, keys|
+            keys.each do |key|
+              it "has valid #{key}" do
+                val = result.send(key)
+                expect(val.nil?).to be false
+                expect(val.to_s).not_to eq ''
+                expect(klass === val).to be true
+              end
             end
           end
         end
 
       end
 
-      context "details" do
+      context "details", vcr: vcr_opts.merge(cassette_name: cname['detail']) do
+
         let(:detail) { results.first.detail }
 
         it "looks up details for results" do
@@ -51,11 +60,18 @@ RSpec.shared_examples "a valid source" do |config|
 
       %w(price cashflow revenue).each do |field|
         %w(min max).each do |direction|
-          context "filters by #{direction} #{field}" do
-            let(:filters) { Filters.new("#{direction}_#{field}": 200_000) }
+
+          key = [direction, field].join('_').to_sym
+          vcr_extra = if config[:searcher].searchable_filters.include?(key)
+            {}
+          else
+            {cassette_name: cname["nonsearchable_details"], record: :new_episodes}
+          end
+
+          context "filters by #{direction} #{field}", vcr: vcr_opts.merge(vcr_extra) do
+            let(:filters) { Filters.new(key => 200_000) }
 
             it "correctly" do
-              key = "#{direction}_#{field}".to_sym
               tested = 0
 
               results.each do |result|

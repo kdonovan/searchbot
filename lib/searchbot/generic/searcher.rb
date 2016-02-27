@@ -12,6 +12,12 @@ class Searchbot::Generic::Searcher
     parse_options( opts )
   end
 
+  # subclasses can override to provide meta information for e.g. specs to
+  # determine when they can share cassettes.
+  def self.searchable_filters(*args)
+    @searchable_filters = args
+  end
+
   def listings
     get_listings if @listings.nil?
     @listings

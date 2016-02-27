@@ -1,10 +1,8 @@
 class Searchbot::Sources::WebsiteClosers::DetailParser < Searchbot::Generic::DetailParser
 
   def parse
-    desc = doc.at('.web_description').text
-
     {
-      description:    sane( desc ),
+      description:    description,
       price:          get('Asking Price'),
       revenue:        get('Gross Income'),
       established:    get('Year Established'),
@@ -14,6 +12,10 @@ class Searchbot::Sources::WebsiteClosers::DetailParser < Searchbot::Generic::Det
   end
 
   private
+
+  def description
+    sane doc.at('.web_description').text
+  end
 
   def get(label)
     if node = doc.css('.left_side2 div').detect {|n| n.at('strong').text.strip == label}

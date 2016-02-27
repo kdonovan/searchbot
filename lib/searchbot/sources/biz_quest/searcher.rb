@@ -9,6 +9,8 @@ class Searchbot::Sources::BizQuest::Searcher < Searchbot::Generic::Searcher
     url.sub(/-for-sale\//, "-for-sale/page-#{page}/")
   end
 
+  searchable_filters :keyword, :state, :max_price, :min_price, :max_revenue, :min_revenue, :max_cashflow, :min_cashflow
+
   def redirected_base_search_url
     @redirected_base_search_url ||= begin
       params = {

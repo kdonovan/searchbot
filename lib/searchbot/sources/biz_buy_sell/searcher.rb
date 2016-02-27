@@ -5,6 +5,8 @@ class Searchbot::Sources::BizBuySell::Searcher < Searchbot::Generic::Searcher
     "http://www.bizbuysell.com/listings/handlers/searchresultsredirector.ashx"
   end
 
+  searchable_filters :keyword, :city, :state, :max_price, :min_price, :max_revenue, :min_revenue, :max_cashflow, :min_cashflow
+
   def url_for_page(page = nil)
     params = {
       # State

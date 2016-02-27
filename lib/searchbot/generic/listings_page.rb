@@ -11,7 +11,7 @@ class Searchbot::Generic::ListingsPage
   def listings
     raw_listings.map do |raw|
       parse_raw_listing(raw)
-    end
+    end.compact
   end
 
   def raw_listings

@@ -10,6 +10,8 @@ class Searchbot::Sources::BusinessBroker::Searcher < Searchbot::Generic::Searche
     'https://www.businessbroker.net/webservices/dataservice.asmx/getlistingdata'
   end
 
+  searchable_filters :keyword, :city, :state, :max_price, :min_price
+
   # Actually params for page, since we're retrieving via JSON
   def params_for_page(page)
     per_page = 50

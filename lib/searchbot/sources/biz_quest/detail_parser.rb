@@ -31,6 +31,7 @@ class Searchbot::Sources::BizQuest::DetailParser < Searchbot::Generic::DetailPar
 
   def parse_dd_for(dt_text)
     dt_text += ':' unless dt_text[-1] == ':'
+
     if node = info.css('dt').detect {|n| n.text.strip == dt_text}
       node = node.next until node.name.upcase == 'DD'
       sane( node.text )
@@ -38,7 +39,9 @@ class Searchbot::Sources::BizQuest::DetailParser < Searchbot::Generic::DetailPar
   end
 
   def info_at(label)
-    return unless node = info.css('b.text-info').detect {|n| n.text.strip == "#{label}:"}
+    return unless node = info.css('b.text-info').detect do |n|
+      n.text.strip == "#{label}:"
+    end
 
     node = node.next
     node = node.next until node.name.upcase == 'B'
@@ -61,7 +64,7 @@ class Searchbot::Sources::BizQuest::DetailParser < Searchbot::Generic::DetailPar
       # Manually fix malformed text
       header_display = header == "Market Outlook/\r\n        Competition:" ? 'Market Outlook/Competition:' : header
 
-      desc << ["[#{header_display.sub(/:$/, '')}]: #{sane parse_dd_for[header]}"]
+      desc << ["[#{header_display.sub(/:$/, '')}]: #{sane parse_dd_for(header)}"]
     end
 
     desc.join(divider)
@@ -83,7 +86,7 @@ class Searchbot::Sources::BizQuest::DetailParser < Searchbot::Generic::DetailPar
 
   # See if there's a comment about EBITDA in one of the dt/dd listings
   def ebitda
-    if cf = parse_dd_for['Cash Flow Comments']
+    if cf = parse_dd_for('Cash Flow Comments')
       if cf = cf.scan(/ebitda: \$([\d,\.]+)/i)[0]
         cf[0]
       end
