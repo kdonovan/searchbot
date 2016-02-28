@@ -15,7 +15,7 @@ class PreviouslySeen < StandardError; end
 require "searchbot/version"
 require "searchbot/inflectors"
 
-SOURCES = %w(biz_buy_sell biz_quest business_broker empire_flippers f_e_international latonas website_closers)
+SOURCES = %w(biz_buy_sell biz_quest business_broker empire_flippers f_e_international latonas website_closers acquisitions_direct)
 
 module Searchbot
   module Generic; end

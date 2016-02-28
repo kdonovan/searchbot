@@ -20,10 +20,27 @@ class Searchbot::Generic::Parser
   end
 
   def parse
-    raise "#parse must implemented in Searchbot::Sources::YYY::XxxParser subclasses (called from #{self.class.name})"
+    @@fields.each_with_object({}) do |field, hash|
+      hash[field] = get_parsed(field)
+    end
+  end
+
+  def self.parses(*fields)
+    @@fields = fields
   end
 
   protected
+
+  def get_parsed(field)
+    # Put any custom mappings here
+    field = 'identifier' if field = 'id'
+
+    if self.respond_to?(field, true)
+      self.send(field)
+    else
+      raise "Automatic #parse implementation expects a method named '#{field}' in #{self.class.name}"
+    end
+  end
 
   # Hook for subclasses to narrow down scope
   def prepare_doc(string)

@@ -56,10 +56,34 @@ create_src_file "listing_parser.rb", <<-EOS
 class Searchbot::Sources::#{camel_src}::ListingParser < Searchbot::Generic::ListingParser
 
   def parse
-
     {
-
+      id:          identifier,
+      title:       title,
+      link:        link,
+      price:       price,
+      cashflow:    cashflow,
+      teaser:      teaser,
     }
+  end
+
+  private
+
+  def identifier
+  end
+
+  def title
+  end
+
+  def link
+  end
+
+  def price
+  end
+
+  def cashflow
+  end
+
+  def teaser
   end
 
 end
@@ -103,3 +127,5 @@ describe Searchbot::Sources::#{camel_src}::Searcher do
 
 end
 EOS
+
+puts "Don't forget to manually add #{under_src} to SOURCES in searchbot.rb"

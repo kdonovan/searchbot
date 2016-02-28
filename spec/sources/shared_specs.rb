@@ -23,10 +23,10 @@ RSpec.shared_examples "a valid source" do |config|
     end
     let(:results) { searcher.listings }
 
-    context "faked", vcr: vcr_opts, focus: true do
+    context "faked", vcr: vcr_opts do
 
       context "listing", vcr: vcr_opts.merge(cassette_name: cname['listing']) do
-        it 'returns results' do
+        it 'returns results', :focus do
           expect(results.length).not_to eq(0)
           expect(results.first).to be_a Searchbot::Results::Listing
         end
