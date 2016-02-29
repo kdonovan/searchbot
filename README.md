@@ -36,10 +36,10 @@ searcher.listings
 
 |Generic Class| Description|
 |---|---|
-|Searcher| is responsible for figuring out how to generate the search url (some sources allow filtering directly in the search, others we have to do broader searches and then filter from the returned results|
-|ListingsPage| given url from Searcher, retrieves the data at that page. Responsible for breaking raw data into chunks to be passed off to ListingParser|
-|ListingParser| given a chunk of data (usually HTML) from ListingsPage, parse it into a standardized Result class. When we want additional information only available on the result's own page (e.g. the listings page usually shows a teaser, but the full description is only shown on a result-specific page), we invoke DetailParser|
-|DetailParser|Given the general listing and a detail page URL, parses out all the remaining details|
+|Searcher| Responsible for figuring out how to generate the search url (some sources allow filtering directly in the search, while for others we have to run the broader searches and then filter from the returned results|
+|ListingsPage| Given the listing results page's url from Searcher, retrieves the data on that page. Responsible for breaking raw data into chunks to be passed off to ListingParser|
+|ListingParser| Given a chunk of data (usually HTML) from ListingsPage, parse it into a standardized Result class. When we want additional information only available on the result's standalone page (e.g. the listings page usually shows a teaser, but the full description is only shown on a result-specific page), we invoke DetailParser|
+|DetailParser|Given the general +Searchbot::Results::Listing+, parses out all the remaining details (usually by loading the listing's link and parsing remaining details from that page).|
 
 
 ## Development

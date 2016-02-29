@@ -12,12 +12,23 @@ end
 class PreviouslySeen < StandardError; end
 
 
-require "searchbot/version"
-require "searchbot/inflectors"
-
-SOURCES = %w(biz_buy_sell biz_quest business_broker empire_flippers f_e_international latonas website_closers acquisitions_direct)
-
 module Searchbot
+
+  BUSINESS_SOURCES = %w(biz_buy_sell biz_quest business_broker)
+  WEBSITE_SOURCES  = %w(empire_flippers f_e_international latonas website_closers acquisitions_direct)
+
+  def self.business_sources
+    BUSINESS_SOURCES
+  end
+
+  def self.website_sources
+    WEBSITE_SOURCES
+  end
+
+  def self.sources
+    business_sources + website_sources
+  end
+
   module Generic; end
 
   module Results; end
@@ -25,12 +36,15 @@ module Searchbot
   module Utils; end
 
   module Sources
-    SOURCES.each do |source|
+    sources.each do |source|
       const_set( Inflectors.camelize(source), Module.new)
     end
   end
+
 end
 
+require "searchbot/version"
+require "searchbot/inflectors"
 require "searchbot/utils/parsing"
 require "searchbot/utils/web"
 require "searchbot/filters"
@@ -41,38 +55,13 @@ require "searchbot/results/listing"
 require "searchbot/generic/concerns/html"
 require "searchbot/generic/parser"
 
+
 common = %w(searcher listings_page listing_parser detail_parser)
 
 common.each {|file| require "searchbot/generic/#{file}" }
 
-SOURCES.each do |source|
+Searchbot.sources.each do |source|
   common.each do |file|
     require "searchbot/sources/#{source}/#{file}"
   end
-end
-
-
-module Searchbot
-
-  def self.business_sources
-    [
-      Searchbot::Sources::BizBuySell,
-      Searchbot::Sources::BizQuest,
-      Searchbot::Sources::BusinessBroker,
-    ]
-  end
-
-  def self.website_sources
-    [
-      Searchbot::Sources::EmpireFlippers,
-      Searchbot::Sources::WebsiteClosers,
-      Searchbot::Sources::FEInternational,
-      Searchbot::Sources::Latonas,
-    ]
-  end
-
-  def self.sources
-    business_sources + website_sources
-  end
-
 end

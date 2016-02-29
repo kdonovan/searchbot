@@ -99,14 +99,14 @@ class Searchbot::Sources::#{camel_src}::ListingsPage < Searchbot::Generic::Listi
 end
 EOS
 
-searcher = if kind == 'business'
+searcher_fields = if kind == 'business'
   "searchable_filters :keyword\n\n"
 end
 
 create_src_file "searcher.rb", <<-EOS
 class Searchbot::Sources::#{camel_src}::Searcher < Searchbot::Generic::Searcher
 
-  #{searchable_fields}
+  #{searcher_fields}
   def url_for_page(page = nil)
   end
 
@@ -126,4 +126,10 @@ describe Searchbot::Sources::#{camel_src}::Searcher do
 end
 EOS
 
-puts "Don't forget to manually add #{under_src} to SOURCES in searchbot.rb"
+
+fname = ROOT + '/lib/searchbot.rb'
+raw = File.read(fname)
+raw = raw.sub(/#{kind.upcase}_SOURCES(\s*)= %w\((.+?)\)/, kind.upcase + '_SOURCES\1= %w(\2 ' + under_src + ')')
+File.open(fname, 'w') {|f| f.puts raw }
+
+puts "* OK: Inserted #{under_src} into SOURCES in searchbot.rb"
