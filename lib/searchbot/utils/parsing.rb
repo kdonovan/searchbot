@@ -2,10 +2,10 @@ module Searchbot::Utils::Parsing
 
   def sane(string)
     return unless string
+    string = string.strip.gsub(/\.(\S)/, '. \1')
 
-    string.strip!
     if string && string.upcase == string
-      string.downcase.split('.').map(&:capitalize).join('.')
+      string.downcase.split('. ').map {|s| s.strip.capitalize }.join('. ')
     else string
     end
   end

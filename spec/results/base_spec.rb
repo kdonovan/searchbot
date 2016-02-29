@@ -11,6 +11,7 @@ describe Searchbot::Results::Base do
       'WA' => [nil, 'WA'],
       'Canada' => [nil, nil],
       'FT. WHEREVER, FLORIDA' => ['Ft. Wherever', 'FL'],
+      'FT.NOSPACE, FLORIDA' => ['Ft. Nospace', 'FL'],
       'King County, WA' => [nil, 'WA'],
       'seattle, wa' => ['Seattle', 'WA'],
       'sEATtle, Wa' => ['sEATtle', 'WA'],
