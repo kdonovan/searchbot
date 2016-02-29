@@ -1,18 +1,10 @@
 class Searchbot::Sources::BizQuest::ListingParser < Searchbot::Generic::ListingParser
 
-  def parse
-    {
-      id:         identifier,
-      price:      price,
-      cashflow:   cashflow,
-      link:       link,
-      title:      sane( title_node.text ),
-      location:   sane( location ),
-      teaser:     sane( description ),
-    }
-  end
+  parses :identifier, :price, :cashflow, :link, :title, :location, :teaser
 
-  private
+  def identifier
+    link.split('/').last.split('.').first
+  end
 
   def price
     doc.at('.price').at('.asking').text
@@ -24,10 +16,6 @@ class Searchbot::Sources::BizQuest::ListingParser < Searchbot::Generic::ListingP
     end
   end
 
-  def title_node
-    @title_node ||= doc.at('.title a')
-  end
-
   def link
     @link ||= begin
       base = page.searcher.redirected_base_search_url
@@ -37,18 +25,24 @@ class Searchbot::Sources::BizQuest::ListingParser < Searchbot::Generic::ListingP
     end
   end
 
-  def identifier
-    link.split('/').last.split('.').first
-  end
-
-  def description
-    doc.at('.desc').text.sub(/ More info/, '...')
+  def title
+    title_node.text
   end
 
   def location
     doc.at('.price').css('a').select do |n|
       n.text != 'View Details'
     end.reverse.map(&:text).take(2).reverse.compact.join(', ')
+  end
+
+  def teaser
+    doc.at('.desc').text.sub(/ More info/, '...')
+  end
+
+  private
+
+  def title_node
+    @title_node ||= doc.at('.title a')
   end
 
 end

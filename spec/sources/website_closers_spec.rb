@@ -5,10 +5,6 @@ describe Searchbot::Sources::WebsiteClosers::Searcher do
 
   it_behaves_like 'a valid website source',
     searcher: Searchbot::Sources::WebsiteClosers::Searcher,
-    max_pages: 2,
-    expected_results: {
-      Integer => [:cashflow, :price],
-      String  => [:id, :title, :teaser, :link]
-    }
+    max_pages: 2
 
 end

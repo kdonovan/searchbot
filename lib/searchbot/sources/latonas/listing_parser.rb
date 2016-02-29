@@ -1,16 +1,33 @@
 class Searchbot::Sources::Latonas::ListingParser < Searchbot::Generic::ListingParser
 
-  def parse
-    {
-      id:          data[:slug].text,
-      price:       data[:price].text,
-      revenue:     data[:revenue].text,
-      cashflow:    data[:profit].text,
-      listed_at:   listed,
-      link:        link,
-      title:       sane( title ),
-      teaser:      teaser,
-    }
+  parses :identifier, :price, :revenue, :cashflow, :listed_at, :link, :title, :teaser
+
+  def identifier; data[:slug].text    end
+  def price;      data[:price].text   end
+  def revenue;    data[:revenue].text end
+  def cashflow;   data[:profit].text  end
+
+  def listed_at
+    Date.strptime(data[:listed_date], '%Y-%m-%d')
+  end
+
+  def title
+    if node = data[:title].at('a').remove
+      node.remove
+    end
+
+    data[:title].text
+  end
+
+  def link
+    detail_url data[:slug].text
+  end
+
+  def teaser
+    type = data[:monetization].text.split('|').compact.join('/')
+    cat  = data[:category].text.split('|').compact.join('/')
+
+    "#{type} website in the #{cat} space(s)"
   end
 
   private
@@ -26,29 +43,6 @@ class Searchbot::Sources::Latonas::ListingParser < Searchbot::Generic::ListingPa
 
   def detail_url(slug)
     "https://latonas.com/websites-for-sale/%s" % slug
-  end
-
-  def title
-    if node = data[:title].at('a').remove
-      node.remove
-    end
-
-    data[:title].text
-  end
-
-  def link
-    detail_url data[:slug].text
-  end
-
-  def listed
-    Date.strptime(data[:listed_date], '%Y-%m-%d')
-  end
-
-  def teaser
-    type = data[:monetization].text.split('|').compact.join('/')
-    cat  = data[:category].text.split('|').compact.join('/')
-
-    "#{type} website in the #{cat} space(s)"
   end
 
 end

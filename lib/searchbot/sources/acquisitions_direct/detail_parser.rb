@@ -2,22 +2,6 @@ class Searchbot::Sources::AcquisitionsDirect::DetailParser < Searchbot::Generic:
 
   parses :price, :cashflow, :revenue, :employees, :established, :description, :inventory
 
-  private
-
-  def li(label)
-    strong = doc.at('ul.circle-yes').css('li').detect do |l|
-      l.css('strong').any? {|s| s.text == label }
-    end
-
-    if strong
-      strong.next.text
-    end
-  end
-
-  def price_text
-    @price_text ||= doc.at('.alert.success .msg strong').text
-  end
-
   def price
     price_text.split('(').first.strip
   end
@@ -39,13 +23,30 @@ class Searchbot::Sources::AcquisitionsDirect::DetailParser < Searchbot::Generic:
   end
 
   def description
-    sane doc.at('.project-description p').text
+    doc.at('.project-description p').text
   end
 
   def inventory
     if price_text.match(/\(plus inventory/)
       price_text.split('(').last
     end
+  end
+
+
+  private
+
+  def li(label)
+    strong = doc.css('ul.circle-yes li').detect do |l|
+      l.css('strong').any? {|s| s.text == label || s.text == "#{label}:" }
+    end
+
+    if strong
+      strong.text.split("#{label}:").last.split(' (').first
+    end
+  end
+
+  def price_text
+    @price_text ||= doc.at('.alert.success .msg strong').text
   end
 
 end

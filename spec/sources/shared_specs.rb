@@ -3,7 +3,7 @@ RSpec.shared_examples "a valid website source" do |config|
 end
 
 RSpec.shared_examples "a valid business source" do |config|
-  it_behaves_like "a valid source", config.merge(filter_location: true)
+  it_behaves_like "a valid source", {filter_location: true}.merge(config)
 end
 
 RSpec.shared_examples "a valid source" do |config|
@@ -26,7 +26,8 @@ RSpec.shared_examples "a valid source" do |config|
     context "faked", vcr: vcr_opts do
 
       context "listing", vcr: vcr_opts.merge(cassette_name: cname['listing']) do
-        it 'returns results', :focus do
+
+        it 'returns results' do
           expect(results.length).not_to eq(0)
           expect(results.first).to be_a Searchbot::Results::Listing
         end
@@ -34,21 +35,24 @@ RSpec.shared_examples "a valid source" do |config|
         context "result" do
           let(:result) { results.first }
 
-          config[:expected_results].each do |klass, keys|
-            keys.each do |key|
-              it "has valid #{key}" do
+          config[:searcher].new({}).fields_from_listing.each do |key|
+
+            it "has valid #{key}" do
+              at_least_one_valid = results.any? do |result|
                 val = result.send(key)
-                expect(val.nil?).to be false
-                expect(val.to_s).not_to eq ''
-                expect(klass === val).to be true
+
+                !val.nil? && val.to_s.length > 0
               end
+
+              expect(at_least_one_valid).to be_truthy, "no examples have a valid #{key}"
             end
+
           end
         end
 
       end
 
-      context "details", vcr: vcr_opts.merge(cassette_name: cname['detail']) do
+      context "details", vcr: vcr_opts.merge(cassette_name: cname['detail'], record: :new_episodes) do
 
         let(:detail) { results.first.detail }
 
@@ -56,10 +60,25 @@ RSpec.shared_examples "a valid source" do |config|
           expect(detail).to be_a Searchbot::Results::Details
         end
 
+        config[:searcher].new({}).fields_from_detail.each do |key|
+
+            it "has valid #{key}" do
+              at_least_one_valid = results.any? do |result|
+                result = result.detail
+                val = result.send(key)
+
+                !val.nil? && val.to_s.length > 0
+              end
+
+              expect(at_least_one_valid).to be_truthy, "no examples have a valid #{key}"
+            end
+
+          end
+
       end
 
-      %w(price cashflow revenue).each do |field|
-        %w(min max).each do |direction|
+      %i(price cashflow revenue).each do |field|
+        %i(min max).each do |direction|
 
           key = [direction, field].join('_').to_sym
           vcr_extra = if config[:searcher].searchable_filters.include?(key)
@@ -72,22 +91,24 @@ RSpec.shared_examples "a valid source" do |config|
             let(:filters) { Filters.new(key => 200_000) }
 
             it "correctly" do
+              return true unless searcher.fields_from_listing.include?(field) || searcher.fields_from_detail.include?(field)
+
               tested = 0
 
               results.each do |result|
-                result = result.detail if filters.detail_only?(key)
+                result = (result.respond_to?(:detail) && result.send(:detail_required_to_filter?, key)) ? result.detail : result
 
                 if val = result.send(field)
                   tested += 1
-                  if direction == 'min'
-                    expect(val).to be >= filters.send(key)
+                  if direction == :min
+                    expect(val).to be >= filters.send(key), lambda { "Expected #{field} to be larger than #{filters.send(key)}, but was #{val}"}
                   else
-                    expect(val).to be <= filters.send(key)
+                    expect(val).to be <= filters.send(key), lambda { "Expected #{field} to be smaller than #{filters.send(key)}, but was #{val}"}
                   end
                 end
               end
 
-              expect(tested).to be > 0
+              expect(tested).to be > 0, lambda { "Failed to find any results with a valid entry for #{field}" }
             end
           end
 
@@ -100,11 +121,11 @@ RSpec.shared_examples "a valid source" do |config|
 
           let(:filters) { Filters.new(min_cashflow: 100_000, state: 'Washington') }
 
-          # it "correctly" do
-          #   results.each do |result|
-          #     expect(result.state).to eq 'WA'
-          #   end
-          # end
+          it "correctly" do
+            results.each do |result|
+              expect(result.state).to eq 'WA'
+            end
+          end
 
         end
 

@@ -1,17 +1,17 @@
 class Searchbot::Sources::FEInternational::DetailParser < Searchbot::Generic::DetailParser
 
-  # No need to pull in another page - just grab from listing's raw
-  def html
-    @html ||= context.raw_listing
+  parses :established
+
+  def established
+    dt = doc.at('article').attributes['data-date'].value
+    Date.strptime(dt, '%Y%m%d')
   end
 
-  def parse
-    dt = doc.at('article').attributes['data-date'].value
-    date = Date.strptime(dt, '%Y%m%d')
+  private
 
-    {
-      established: date
-    }
+  # No need to pull in another page - just grab from listing's raw
+  def html
+    @html ||= listing.raw_listing
   end
 
 end

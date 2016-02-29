@@ -1,32 +1,21 @@
 class Searchbot::Sources::FEInternational::ListingParser < Searchbot::Generic::ListingParser
 
-  def parse
-    {
-      id:          identifier,
-      price:       doc.at('.listing-overview-item--asking-price').text,
-      revenue:     doc.at('.listing-overview-item--yearly-revenue').text,
-      cashflow:    doc.at('.listing-overview-item--yearly-profit').text,
-      link:        link,
-      title:       sane( title_node.text ),
-      teaser:      description,
-    }
-  end
+  parses :identifier, :price, :revenue, :cashflow, :link, :title, :teaser
 
-  private
+  def price;       doc.at('.listing-overview-item--asking-price').text end
+  def revenue;     doc.at('.listing-overview-item--yearly-revenue').text end
+  def cashflow;    doc.at('.listing-overview-item--yearly-profit').text end
+  def title;       sane( title_node.text ) end
 
-  def title_node
-    @title_node ||= doc.at('h2.listing-title a')
+  def identifier
+    link.split('/').last.split('-').first
   end
 
   def link
     title_node['href']
   end
 
-  def identifier
-    link.split('/').last.split('-').first
-  end
-
-  def description
+  def teaser
     desc  = []
 
     doc.at('.listing-description > p').children.each do |node|
@@ -36,6 +25,12 @@ class Searchbot::Sources::FEInternational::ListingParser < Searchbot::Generic::L
     end
 
     desc.join(divider)
+  end
+
+  private
+
+  def title_node
+    @title_node ||= doc.at('h2.listing-title a')
   end
 
 end

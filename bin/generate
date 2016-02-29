@@ -3,9 +3,12 @@
 require 'fileutils'
 require_relative "../lib/searchbot/inflectors"
 
-raise ArgumentError, "I only know how to generate new sources at this point" unless ARGV[0] == 'source'
 
+kind = ARGV[0]
 src = ARGV[1]
+
+kinds = %w(business website)
+raise ArgumentError, "I only know how to generate new sources at this point" unless kinds.include? kind
 
 if src.chars.select {|c| c.match /[a-z]/i }.any? {|c| c == c.capitalize }
   raise ArgumentError, "Source names must be underscored (e.g. biz_buy_sell)"
@@ -42,12 +45,15 @@ FileUtils.mkdir_p(DIR)
 create_src_file "detail_parser.rb", <<-EOS
 class Searchbot::Sources::#{camel_src}::DetailParser < Searchbot::Generic::DetailParser
 
-  def parse
+  parses :revenue, :description
 
-    {
-
-    }
+  def revenue
   end
+
+  def description
+  end
+
+  private
 
 end
 EOS
@@ -55,26 +61,15 @@ EOS
 create_src_file "listing_parser.rb", <<-EOS
 class Searchbot::Sources::#{camel_src}::ListingParser < Searchbot::Generic::ListingParser
 
-  def parse
-    {
-      id:          identifier,
-      title:       title,
-      link:        link,
-      price:       price,
-      cashflow:    cashflow,
-      teaser:      teaser,
-    }
-  end
-
-  private
+  parses :identifier, :link, :title, :price, :cashflow, :teaser
 
   def identifier
   end
 
-  def title
+  def link
   end
 
-  def link
+  def title
   end
 
   def price
@@ -85,6 +80,8 @@ class Searchbot::Sources::#{camel_src}::ListingParser < Searchbot::Generic::List
 
   def teaser
   end
+
+  private
 
 end
 EOS
@@ -102,9 +99,14 @@ class Searchbot::Sources::#{camel_src}::ListingsPage < Searchbot::Generic::Listi
 end
 EOS
 
+searcher = if kind == 'business'
+  "searchable_filters :keyword\n\n"
+end
+
 create_src_file "searcher.rb", <<-EOS
 class Searchbot::Sources::#{camel_src}::Searcher < Searchbot::Generic::Searcher
 
+  #{searchable_fields}
   def url_for_page(page = nil)
   end
 
@@ -118,12 +120,8 @@ require 'sources/shared_specs'
 
 describe Searchbot::Sources::#{camel_src}::Searcher do
 
-  it_behaves_like 'a valid business source',
-    searcher: Searchbot::Sources::#{camel_src}::Searcher,
-    expected_results: {
-      Integer => [:cashflow, :price],
-      String  => [:id, :title, :teaser, :link]
-    }
+  it_behaves_like 'a valid #{kind} source',
+    searcher: Searchbot::Sources::#{camel_src}::Searcher
 
 end
 EOS

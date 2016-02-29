@@ -22,10 +22,6 @@ class Filters < Hashie::Dash
 
   property :keyword
 
-  def detail_only?(field)
-    !![:min_revenue, :max_revenue].index(field)
-  end
-
   def state_abbrev(*ignored)
     super(state)
   end

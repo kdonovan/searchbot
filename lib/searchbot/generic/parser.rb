@@ -1,6 +1,7 @@
 class Searchbot::Generic::Parser
   include Searchbot::Generic::Concerns::Html
   include Searchbot::Utils::Web
+  include Searchbot::Utils::Parsing
 
   attr_reader :url
 
@@ -20,41 +21,36 @@ class Searchbot::Generic::Parser
   end
 
   def parse
-    @@fields.each_with_object({}) do |field, hash|
-      hash[field] = get_parsed(field)
-    end
+    raise "Must be explicitly implemented, or implied by the use of the `parses` declaration"
   end
 
   def self.parses(*fields)
-    @@fields = fields
+    fields_list = fields
+    fields_list += [:city, :state] if fields.include?(:location)
+    fields_list += [:cashflow] if fields.include?(:cashflow_from)
+
+    define_singleton_method :fields_parsed do
+      fields_list
+    end
+
+    define_method :parse do
+      # Implement before hook - if it returns false, parse is never actually run
+      do_parsing = !self.respond_to?(:before_parse) || before_parse
+      return unless do_parsing
+
+      fields.each_with_object({}) do |field, hash|
+        hash[field] = get_parsed(field)
+      end
+    end
   end
 
   protected
 
   def get_parsed(field)
-    # Put any custom mappings here
-    field = 'identifier' if field = 'id'
-
-    if self.respond_to?(field, true)
+    if self.respond_to?(field)
       self.send(field)
     else
       raise "Automatic #parse implementation expects a method named '#{field}' in #{self.class.name}"
-    end
-  end
-
-  # Hook for subclasses to narrow down scope
-  def prepare_doc(string)
-    string
-  end
-
-  # Parsing utilities
-  def sane(string)
-    return unless string
-
-    string.strip!
-    if string && string.upcase == string
-      string.downcase.split('.').map(&:capitalize).join('.')
-    else string
     end
   end
 

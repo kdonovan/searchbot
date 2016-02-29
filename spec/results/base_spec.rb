@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Searchbot::Results::Base do
 
   context "#parse_location" do
-    base_params = {id: 1, link: 'testing'}
+    base_params = {identifier: 1, link: 'testing'}
     locations = {
       'Seattle, WA' => ['Seattle', 'WA'],
       'Seattle Metro, Washington' => ['Seattle Metro', 'WA'],

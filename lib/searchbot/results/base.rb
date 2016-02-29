@@ -1,22 +1,22 @@
 module Searchbot
   class Results::Base < Hashie::Dash
     include Hashie::Extensions::Dash::PropertyTranslation
-    extend Utils::Parsing
+    extend Searchbot::Utils::Parsing
 
     property :searcher
 
-    property :id,      required: true
-    property :link,    required: true
+    property :identifier,   required: true
+    property :link,         required: true
 
     property :price,    transform_with: ->(v) { str2i(v) }
     property :cashflow, transform_with: ->(v) { str2i(v) }
     property :revenue,  transform_with: ->(v) { str2i(v) }
 
-    property :title
-    property :teaser
+    property :title,    transform_with: ->(v) { sane(v) }
+    property :teaser,   transform_with: ->(v) { sane(v) }
 
-    property :city
-    property :state
+    property :city,     transform_with: ->(v) { sane(v) }
+    property :state,    transform_with: ->(v) { sane(v) }
 
     property :listed_at
 
@@ -29,7 +29,7 @@ module Searchbot
     property :cashflow_from
 
     # Use this to filter out city, state as needed
-    property :location
+    property :location,   transform_with: ->(v) { sane(v) }
 
     def cashflow
       self[:cashflow_from] ? Array(self[:cashflow_from]).map {|k| self.class.str2i(k) }.reject {|v| v.to_i.zero? }.min : self[:cashflow]
@@ -44,23 +44,25 @@ module Searchbot
       self.class.state_abbrev( self[:state] || parse_location[1] )
     end
 
+    def search_time_filters
+      [:keyword]
+    end
+
     def passes_filters?(filters)
       passes_hardcoded_filters? && filters.all? do |key, value|
         # Skip any filters with nil values. Some filter keys are for search-time only, not after-search filtering.
-        if value.nil? || %i(keyword).include?(key)
+        if value.nil? || search_time_filters.include?(key)
           true
         else
           # Some filters must be applied to the detailed version - if so, grab the details now
-          to_test = (self.respond_to?(:detail) && filters.detail_only?(key)) ? self.detail : self
+          to_test = (self.respond_to?(:detail) && detail_required_to_filter?(key)) ? self.detail : self
           to_test.passes_filter?(key, value)
         end
       end
     end
 
     def passes_filter?(key, value)
-      k = key.to_s
-      constraint = k.include?('_') ? k.split('_').first.to_sym : nil
-      field = constraint ? k.split("#{constraint}_")[1].to_sym : key
+      constraint, field = explode_filter_key(key)
 
       # Default to skipping those without enough data
       return unless self.send(field)
@@ -83,12 +85,36 @@ module Searchbot
         raw << :cashflow if cashflow && !raw.index(:cashflow)
         raw.delete(:cashflow_from)
 
-        raw.delete(:raw)
+        raw.delete(:searcher)
+        raw.delete(:raw_listing)
         raw.delete(:raw_details)
       end
     end
 
     private
+
+    def explode_filter_key(key)
+      return [nil, key] unless key.to_s.match(/(min|max)_/)
+
+      k          = key.to_s
+      constraint = k.include?('_') ? k.split('_').first.to_sym : nil
+      field      = constraint ? k.split("#{constraint}_")[1].to_sym : key
+
+      [constraint, field]
+    end
+
+    def detail_required_to_filter?(key)
+      constraint, field = explode_filter_key(key)
+      return false if search_time_filters.include?(field)
+
+      if searcher.fields_from_listing.include?(field)
+        false
+      elsif searcher.fields_from_detail.include?(field)
+        true
+      else
+        raise "#{searcher.listings_page.name} doesn't know how to parse '#{field}' from either listings or details"
+      end
+    end
 
     def parse_location
       return [] unless self[:location]

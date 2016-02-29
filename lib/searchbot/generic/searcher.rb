@@ -35,6 +35,14 @@ class Searchbot::Generic::Searcher
     source_class 'ListingsPage'
   end
 
+  def fields_from_listing
+    listing_parser.fields_parsed
+  end
+
+  def fields_from_detail
+    detail_parser.fields_parsed
+  end
+
   private
 
   def constantize(string)
@@ -81,13 +89,13 @@ class Searchbot::Generic::Searcher
 
       page.listings.each do |listing|
         next unless listing.passes_filters?(filters)
-        break if seen.include?(listing.id)
+        break if seen.include?(listing.identifier)
 
         @listings << listing
       end
 
       more_pages = page.more_pages_available?
-      break if max_pages && curr_page > max_pages
+      break if max_pages && curr_page >= max_pages
     end
   end
 
@@ -96,7 +104,7 @@ class Searchbot::Generic::Searcher
   end
 
   def unseen
-    @unseen ||= results.reject {|result| seen.include?(result.id) }
+    @unseen ||= listings.reject {|listing| seen.include?(listing.identifier) }
   end
 
   def map_id_for_state(state)

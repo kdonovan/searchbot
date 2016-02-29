@@ -2,14 +2,12 @@ class Searchbot::Sources::AcquisitionsDirect::ListingParser < Searchbot::Generic
 
   parses :identifier, :title, :link, :teaser
 
-  private
-
   def identifier
     link.split('/').compact.last
   end
 
   def title
-    sane doc.at('h2').text
+    doc.at('h2').text
   end
 
   def link
@@ -17,7 +15,7 @@ class Searchbot::Sources::AcquisitionsDirect::ListingParser < Searchbot::Generic
   end
 
   def teaser
-    sane doc.at('.post-content').text
+    doc.at('.post-content').text
   end
 
 end

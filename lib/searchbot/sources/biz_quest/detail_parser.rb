@@ -1,26 +1,53 @@
 class Searchbot::Sources::BizQuest::DetailParser < Searchbot::Generic::DetailParser
 
-  def parse
-    {
-      revenue:        info_at('Gross Revenue'),
+  parses :revenue, :ffe, :inventory, :established, :employees, :reason_selling, :description, :seller_financing, :cashflow_from
 
-      ffe:            info_at('FF&E'),
-      inventory:      info_at('Inventory'),
+  def revenue
+    info_at('Gross Revenue')
+  end
 
-      established:    parse_dd_for('Year Established'),
-      employees:      parse_dd_for('Number of Employees'),
-      reason_selling: parse_dd_for('Reason For Selling'),
+  def ffe
+    info_at('FF&E')
+  end
 
-      description:    description,
+  def inventory
+    info_at('Inventory')
+  end
 
-      seller_financing: !!parse_dd_for('Seller Financing'),
-    }.tap do |params|
-      if ebitda
-        params[:cashflow_from] = [info_at('Cash Flow'), ebitda]
-      else
-        params[:cashflow] = info_at('Cash Flow')
-      end
+  def established
+    parse_dd_for('Year Established')
+  end
+
+  def employees
+    parse_dd_for('Number of Employees')
+  end
+
+  def reason_selling
+    parse_dd_for('Reason For Selling')
+  end
+
+  def description
+    desc = [ sane( parse_section_after(info, 'Business Description') ) ]
+
+    info.css('dt').map(&:text).each do |header|
+      next if unwanted_dts.include?(header)
+
+      # Manually fix malformed text
+      header_display = header == "Market Outlook/\r\n        Competition:" ? 'Market Outlook/Competition:' : header
+
+      desc << ["[#{header_display.sub(/:$/, '')}]: #{sane parse_dd_for(header)}"]
     end
+
+    desc.join(divider)
+  end
+
+  def seller_financing
+    !!parse_dd_for('Seller Financing')
+  end
+
+  # Using cashflow_from, rather than cashflow, to allow pulling cashflow from editba comments as well
+  def cashflow_from
+    [info_at('Cash Flow'), ebitda].compact
   end
 
   private
@@ -53,21 +80,6 @@ class Searchbot::Sources::BizQuest::DetailParser < Searchbot::Generic::DetailPar
 
   def unwanted_dts
     ['BizQuest Listing ID:', 'Ad Detail Views:', 'Year Established:', 'Number of Employees:', 'Reason For Selling:']
-  end
-
-  def description
-    desc = [ sane( parse_section_after(info, 'Business Description') ) ]
-
-    info.css('dt').map(&:text).each do |header|
-      next if unwanted_dts.include?(header)
-
-      # Manually fix malformed text
-      header_display = header == "Market Outlook/\r\n        Competition:" ? 'Market Outlook/Competition:' : header
-
-      desc << ["[#{header_display.sub(/:$/, '')}]: #{sane parse_dd_for(header)}"]
-    end
-
-    desc.join(divider)
   end
 
   def parse_section_after(context, h3_text)

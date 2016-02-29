@@ -1,27 +1,37 @@
 class Searchbot::Sources::WebsiteClosers::ListingParser < Searchbot::Generic::ListingParser
 
-  def parse
-    info = doc.at('.disc_box')
-    title_node = info.at('span:first-child a')
-    price_node = info.at('span:nth-child(2)')
-    cashf_node = info.at('span:nth-child(3)')
+  parses :identifier, :price, :cashflow, :link, :title, :teaser
 
-    unless price_node.at('strong').text == 'Available'
-      page.seen_sold_listing = true
-      return nil
-    end
+  def before_parse
+    return true if price_node.at('strong').text == 'Available'
 
-    link  = title_node['href']
-    id    = link.split('/').last
+    page.seen_sold_listing = true
+    return nil
+  end
 
-    {
-      id:         id,
-      price:      price_node.at('p').text,
-      cashflow:   cashf_node.text,
-      link:       link,
-      title:      sane( title_node.text ),
-      teaser:     sane( info.at('> p').text ),
-    }
+  def link;       title_node['href']              end
+  def identifier; link.split('/').last            end
+  def price;      price_node.at('p').text         end
+  def cashflow;   cashf_node.text                 end
+  def title;      title_node.text                 end
+  def teaser;     doc.at('> p').text              end
+
+  private
+
+  def prepare_doc(raw)
+    raw.at('.disc_box')
+  end
+
+  def title_node
+    doc.at('span:first-child a')
+  end
+
+  def price_node
+    doc.at('span:nth-child(2)')
+  end
+
+  def cashf_node
+    doc.at('span:nth-child(3)')
   end
 
 end

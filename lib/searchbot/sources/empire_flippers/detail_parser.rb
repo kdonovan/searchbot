@@ -1,23 +1,19 @@
 class Searchbot::Sources::EmpireFlippers::DetailParser < Searchbot::Generic::DetailParser
 
-  def parse
-    {
-      revenue:        revenue,
-      description:    doc.at('.listing--description p').text,
-      hours_required: hours,
-      reason_selling: sane(reason),
-    }
+  parses :revenue, :description, :hours_required, :reason_selling
+
+  def description
+    doc.at('.listing--description p').text
   end
 
-  private
-
-  def reason
-    if h3 = doc.css('.listing--content h3').detect {|n| n.text == 'Reason for Sale'}
-      h3.next.text
+  def reason_selling
+    if node = doc.css('.listing--content h3').detect {|n| n.text == 'Reason for Sale'}
+      node = node.next while node && node.name != 'p'
+      sane node.text
     end
   end
 
-  def hours
+  def hours_required
     if node = doc.at('.listing--hours')
       if hrs = node.text.scan(/(\d+)\s*hours/i).flatten.first
         hrs.to_i

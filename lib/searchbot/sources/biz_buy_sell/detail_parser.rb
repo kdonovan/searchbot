@@ -1,36 +1,16 @@
 class Searchbot::Sources::BizBuySell::DetailParser < Searchbot::Generic::DetailParser
 
-  def parse
-    {
-      revenue:        get(1),
-      cashflow_from:  [get(2), get(3)],
+  parses :revenue, :cashflow_from, :ffe, :inventory, :real_estate, :established, :employees, :description, :seller_financing
 
-      ffe:            get(4),
-      inventory:      get(5),
+  def revenue; get(1) end
+  def cashflow_from; [get(2), get(3)] end
+  def ffe; get(4) end
+  def inventory; get(5) end
+  def real_estate; get(6) end
+  def established; get(7) end
+  def employees; get(8) end
 
-      real_estate:    get(6),
-      established:    get(7),
-      employees:      get(8),
-
-      description:    sane( parse_desc ),
-
-      seller_financing: !!doc.at('#seller-financing'),
-    }
-  end
-
-
-  private
-
-  def prepare_doc
-    doc.xpath("//script").remove
-    doc = doc.at('.financials')
-  end
-
-  def get(label)
-    doc.css('p')[label].at('b').text
-  end
-
-  def parse_desc
+  def description
     desc = []
     node = doc.at('#listingActions')
 
@@ -43,6 +23,22 @@ class Searchbot::Sources::BizBuySell::DetailParser < Searchbot::Generic::DetailP
     end
 
     desc.join( divider )
+  end
+
+  def seller_financing
+    !!doc.at('#seller-financing')
+  end
+
+
+  private
+
+  def prepare_doc(raw)
+    raw.xpath("//script").remove
+    raw.at('.financials')
+  end
+
+  def get(label)
+    doc.css('p')[label].at('b').text
   end
 
 end

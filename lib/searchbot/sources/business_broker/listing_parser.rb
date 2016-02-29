@@ -1,18 +1,22 @@
 class Searchbot::Sources::BusinessBroker::ListingParser < Searchbot::Generic::ListingParser
 
-  def parse
-    {
-      price:      get('Price'),
-      cashflow:   get('CashFlow'),
-      revenue:    get('YearlyRevenue'),
-      title:      sane( get('Heading') ),
-      teaser:     sane( get('Overview') ),
-      link:       link,
-      id:         get('ListID').to_s,
-      city:       sane( get('City') ),
-      state:      sane( get('State') ),
-    }
+  parses :identifier, :price, :cashflow, :revenue, :title, :teaser, :link, :city, :state
+
+  def price;      get('Price') end
+  def cashflow;   get('CashFlow') end
+  def revenue;    get('YearlyRevenue') end
+  def title;      get('Heading') end
+  def teaser;     get('Overview') end
+  def identifier; get('ListID').to_s end
+  def city;       get('City') end
+  def state;      get('State') end
+
+  def link
+    base = page.searcher.base_url
+
+    URI.join( base, get('URL') ).to_s
   end
+
 
   private
 
@@ -22,12 +26,6 @@ class Searchbot::Sources::BusinessBroker::ListingParser < Searchbot::Generic::Li
 
   def get(field)
     json[field] == 'Not Disclosed' ? nil : json[field]
-  end
-
-  def link
-    base = page.searcher.base_url
-
-    URI.join( base, get('URL') ).to_s
   end
 
 end

@@ -1,20 +1,18 @@
 class Searchbot::Sources::EmpireFlippers::ListingParser < Searchbot::Generic::ListingParser
 
-  def parse
-    {
-      price:        json['price'].to_i,
-      cashflow:     json['net_profit'].to_i * 12,
-      title:        title,
-      link:         link,
-      id:           json['listing_id'].to_s,
-      teaser:       teaser,
-    }
+  parses :identifier, :price, :cashflow, :title, :link, :teaser
+
+
+  def identifier
+    json['listing_id'].to_s
   end
 
-  private
+  def price
+    json['price'].to_i
+  end
 
-  def json
-    html # We're passing it as w/ HTML name, but it's JSON from their API
+  def cashflow
+    json['net_profit'].to_i * 12
   end
 
   def title
@@ -27,6 +25,12 @@ class Searchbot::Sources::EmpireFlippers::ListingParser < Searchbot::Generic::Li
 
   def teaser
     "Created: #{json['date_created']}. Posted: #{json['post_date']}."
+  end
+
+  private
+
+  def json
+    html # We're passing it as w/ HTML name, but it's JSON from their API
   end
 
 end

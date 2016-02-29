@@ -1,5 +1,16 @@
 module Searchbot::Utils::Parsing
 
+  def sane(string)
+    return unless string
+
+    string.strip!
+    if string && string.upcase == string
+      string.downcase.split('.').map(&:capitalize).join('.')
+    else string
+    end
+  end
+
+
   def str2i(string)
     Searchbot::Utils::Parsing.str2i(string)
   end

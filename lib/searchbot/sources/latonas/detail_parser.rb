@@ -1,12 +1,27 @@
 class Searchbot::Sources::Latonas::DetailParser < Searchbot::Generic::DetailParser
 
-  def parse
-    # Note: lots more custom stats we could pull in if desired. And graphs!
-    {
-      description:    description,
-      business_url:   business_url,
-      established:    established,
-    }
+  # Note: lots more custom stats we could pull in if desired. And graphs!
+  parses :description, :business_url, :established
+
+  def established
+    if date = info('Domain/Site Info', 'Site Established')
+      Date.strptime(date, '%Y-%m-%d')
+    end
+  end
+
+  def business_url
+    if img = doc.css('img').detect {|i| i['src'].to_s.match(/visit_site.jpg/) }
+      img.parent['href']
+    end
+  end
+
+  def description
+    desc = [doc.at('.listing-left p').text]
+    desc << detail('Revenue Details')
+    desc << detail('Traffic Details')
+    desc << detail('Expense Details')
+
+    desc.compact.join(divider)
   end
 
   private
@@ -30,27 +45,6 @@ class Searchbot::Sources::Latonas::DetailParser < Searchbot::Generic::DetailPars
         "[#{label}]: #{sane div.text}"
       end
     end
-  end
-
-  def established
-    if date = info('Domain/Site Info', 'Site Established')
-      Date.strptime(date, '%Y-%m-%d')
-    end
-  end
-
-  def business_url
-    if node = doc.css('a').detect {|l| l.text == 'Visit Site' }
-      node['href']
-    end
-  end
-
-  def description
-    desc = [doc.at('.listing-left p').text]
-    desc << detail('Revenue Details')
-    desc << detail('Traffic Details')
-    desc << detail('Expense Details')
-
-    desc.compact.join(divider)
   end
 
 end
