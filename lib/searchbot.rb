@@ -35,12 +35,6 @@ module Searchbot
 
   module Utils; end
 
-  module Sources
-    sources.each do |source|
-      const_set( Inflectors.camelize(source), Module.new)
-    end
-  end
-
 end
 
 require "searchbot/version"
@@ -55,6 +49,13 @@ require "searchbot/results/listing"
 require "searchbot/generic/concerns/html"
 require "searchbot/generic/parser"
 
+module Searchbot
+  module Sources
+    Searchbot.sources.each do |source|
+      const_set( Inflectors.camelize(source), Module.new)
+    end
+  end
+end
 
 common = %w(searcher listings_page listing_parser detail_parser)
 
