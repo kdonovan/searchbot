@@ -60,6 +60,12 @@ RSpec.shared_examples "a valid source" do |config|
           expect(detail).to be_a Searchbot::Results::Details
         end
 
+        it "returns detailed listings" do
+          searcher.detailed_listings.take(10).each do |listing|
+            expect(listing).to be_a Searchbot::Results::Details
+          end
+        end
+
         config[:searcher].new({}).fields_from_detail.each do |key|
 
             it "has valid #{key}" do

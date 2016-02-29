@@ -23,6 +23,10 @@ class Searchbot::Generic::Searcher
     @listings
   end
 
+  def detailed_listings
+    @detailed_listings ||= listings.map(&:detail)
+  end
+
   def listing_parser
     source_class 'ListingParser'
   end

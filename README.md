@@ -17,18 +17,12 @@ And then execute:
 
 ## Usage
 
-Check the specs for detailed usage.  In brief:
-
-Given a set of filters:
+Check the specs for detailed usage.  In brief, to search e.g. BizQuest:
 
 ```ruby
-  filters = Filters.new(min_cashflow: 100_000)
-```
-
-To search e.g. BizQuest:
-
-```ruby
-  Searchbot::Sources::BizQuest::Searcher.new(filters).listings
+  filters  = Filters.new(min_cashflow: 100_000)
+  searcher = Searchbot::Sources::BizQuest::Searcher.new(filters)
+  listings = searcher.listings # or searcher.detailed_listings in you want each result to be fully prepopulated with its details
 ```
 
 This will return an array of Searchbot::Results (specifically either `Searchbot::Results::Listing` or `Searchbot::Results::Detail`, depending on whether that specific result has fetched its detail page data yet).
