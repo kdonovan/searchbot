@@ -93,7 +93,7 @@ class Searchbot::Sources::#{camel_src}::ListingsPage < Searchbot::Generic::Listi
   end
 
   def more_pages_available?
-    raise "more_pages_available? must be implemented in #{self.class.name}"
+    raise "more_pages_available? must be implemented in #{camel_src}"
   end
 
 end
@@ -129,7 +129,7 @@ EOS
 
 fname = ROOT + '/lib/searchbot.rb'
 raw = File.read(fname)
-raw = raw.sub(/#{kind.upcase}_SOURCES(\s*)= %w\((.+?)\)/, kind.upcase + '_SOURCES\1= %w(\2 ' + under_src + ')')
+raw = raw.sub(/#{kind.upcase}_SOURCE_NAMES(\s*)= %w\((.+?)\)/, kind.upcase + '_SOURCE_NAMES\1= %w(\2 ' + under_src + ')')
 File.open(fname, 'w') {|f| f.puts raw }
 
 puts "* OK: Inserted #{under_src} into SOURCES in searchbot.rb"
