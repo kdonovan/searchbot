@@ -40,14 +40,22 @@ class Searchbot::Generic::Searcher
   end
 
   def fields_from_listing
-    listing_parser.fields_parsed
+    fields_from listing_parser
   end
 
   def fields_from_detail
-    detail_parser.fields_parsed
+    fields_from detail_parser
+  end
+
+  def all_fields
+    fields_from_listing + fields_from_detail
   end
 
   private
+
+  def fields_from(parser)
+    parser.fields_parsed
+  end
 
   def constantize(string)
     string.split('::').compact.inject(Object) {|context, name| context.const_get(name) }

@@ -35,6 +35,12 @@ module Searchbot
       self[:cashflow_from] ? Array(self[:cashflow_from]).map {|k| self.class.str2i(k) }.reject {|v| v.to_i.zero? }.min : self[:cashflow]
     end
 
+    def ratio
+      if cashflow && price
+        price.to_f / cashflow
+      end
+    end
+
     def city
       self[:city] || parse_location[0]
     end
@@ -106,6 +112,7 @@ module Searchbot
     def detail_required_to_filter?(key)
       constraint, field = explode_filter_key(key)
       return false if search_time_filters.include?(field)
+      return detail_required_to_filter_ratio? if field == :ratio
 
       if searcher.fields_from_listing.include?(field)
         false
@@ -114,6 +121,14 @@ module Searchbot
       else
         raise "#{searcher.listings_page.name} doesn't know how to parse '#{field}' from either listings or details"
       end
+    end
+
+    def detail_required_to_filter_ratio?
+      goal = [:cashflow, :price]
+      list_fields = searcher.fields_from_listing
+      both_fields = searcher.all_fields
+
+      (goal & list_fields).length < 2 && (goal & (both_fields)).length == 2
     end
 
     def parse_location
@@ -139,8 +154,8 @@ module Searchbot
 
     def passes_complex_filter?(field, min_max, value)
       case min_max
-      when :min then self[field] >= value
-      when :max then self[field] <= value
+      when :min then self.send(field) >= value
+      when :max then self.send(field) <= value
       else raise "Unknown complex filter: #{min_max}"
       end
     end

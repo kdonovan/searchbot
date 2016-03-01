@@ -8,7 +8,6 @@ class Searchbot::Generic::DetailParser < Searchbot::Generic::Parser
     super(html: html, url: url)
   end
 
-
   def result
     params = listing.to_hash
       .merge( result_defaults )

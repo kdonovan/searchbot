@@ -14,6 +14,9 @@ class Filters < Hashie::Dash
   property :min_cashflow
   property :max_cashflow
 
+  property :min_ratio
+  property :max_ratio
+
   property :min_revenue
   property :max_revenue
 
