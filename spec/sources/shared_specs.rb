@@ -83,7 +83,7 @@ RSpec.shared_examples "a valid source" do |config|
 
       end
 
-      %i(price cashflow revenue ratio).each do |field|
+      %i(price cashflow revenue ratio hours_required).each do |field|
         %i(min max).each do |direction|
 
           key = [direction, field].join('_').to_sym
@@ -94,7 +94,7 @@ RSpec.shared_examples "a valid source" do |config|
           end
 
           context "filters by #{direction} #{field}", vcr: vcr_opts.merge(vcr_extra) do
-            let(:filters) { Filters.new(key => field == :ratio ? 3 : 200_000) }
+            let(:filters) { Filters.new(key => [:ratio, :hours_required].include?(field) ? 2 : 200_000) }
 
             it "correctly" do
 

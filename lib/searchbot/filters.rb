@@ -20,6 +20,11 @@ class Filters < Hashie::Dash
   property :min_revenue
   property :max_revenue
 
+  # Web stuff
+  property :min_hours_required
+  property :max_hours_required
+
+
   property :state
   property :city
 
