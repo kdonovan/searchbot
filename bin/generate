@@ -4,9 +4,7 @@ require 'fileutils'
 require_relative "../lib/searchbot/inflectors"
 
 
-kind = ARGV[0]
-src = ARGV[1]
-
+kind, src, *others = ARGV
 kinds = %w(business website)
 raise ArgumentError, "I only know how to generate new sources at this point" unless kinds.include? kind
 
@@ -14,9 +12,7 @@ if src.chars.select {|c| c.match /[a-z]/i }.any? {|c| c == c.capitalize }
   raise ArgumentError, "Source names must be underscored (e.g. biz_buy_sell)"
 end
 
-under_src = src
-
-camel_src = Searchbot::Inflectors.camelize(src)
+under_src, camel_src = src, Searchbot::Inflectors.camelize(src)
 puts "Generating files for new source: #{camel_src}"
 
 ROOT = File.expand_path(__FILE__ + '/../..')
@@ -38,7 +34,6 @@ def create_src_file(path, contents)
   path = [DIR_PATH, path].join('/')
   create_file(path, contents)
 end
-
 
 FileUtils.mkdir_p(DIR)
 
@@ -139,4 +134,3 @@ else
   File.open(fname, 'w') {|f| f.puts raw }
   puts "* OK: Inserted #{under_src} into SOURCES in searchbot.rb"
 end
-
