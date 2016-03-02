@@ -83,6 +83,11 @@ RSpec.shared_examples "a valid source" do |config|
 
       end
 
+      custom_filters = {
+        ratio: 3,
+        hours_required: 2,
+      }
+
       %i(price cashflow revenue ratio hours_required).each do |field|
         %i(min max).each do |direction|
 
@@ -94,12 +99,12 @@ RSpec.shared_examples "a valid source" do |config|
           end
 
           context "filters by #{direction} #{field}", vcr: vcr_opts.merge(vcr_extra) do
-            let(:filters) { Filters.new(key => [:ratio, :hours_required].include?(field) ? 2 : 200_000) }
+            let(:filters) { Filters.new(key => custom_filters[field] || 200_000) }
 
             it "correctly" do
 
               can_handle = -> (f) {
-                handled = searcher.fields_from_listing + searcher.fields_from_detail
+                handled = searcher.all_fields
                 if f == :ratio
                   handled.include?(:cashflow) && handled.include?(:price)
                 else
@@ -107,24 +112,25 @@ RSpec.shared_examples "a valid source" do |config|
                 end
               }
 
-              return unless can_handle[field]
+              if can_handle[field]
 
-              tested = 0
+                tested = 0
 
-              results.each do |result|
-                result = (result.respond_to?(:detail) && result.send(:detail_required_to_filter?, key)) ? result.detail : result
+                results.each do |result|
+                  result = (result.respond_to?(:detail) && result.send(:detail_required_to_filter?, key)) ? result.detail : result
 
-                if val = result.send(field)
-                  tested += 1
-                  if direction == :min
-                    expect(val).to be >= filters.send(key), lambda { "Expected #{field} to be larger than #{filters.send(key)}, but was #{val}"}
-                  else
-                    expect(val).to be <= filters.send(key), lambda { "Expected #{field} to be smaller than #{filters.send(key)}, but was #{val}"}
+                  if val = result.send(field)
+                    tested += 1
+                    if direction == :min
+                      expect(val).to be >= filters.send(key), lambda { "Expected #{field} to be larger than #{filters.send(key)}, but was #{val}"}
+                    else
+                      expect(val).to be <= filters.send(key), lambda { "Expected #{field} to be smaller than #{filters.send(key)}, but was #{val}"}
+                    end
                   end
                 end
-              end
 
-              expect(tested).to be > 0, lambda { "Failed to find any results with a valid entry for #{field}" }
+                expect(tested).to be > 0, lambda { "Failed to find any results with a valid entry for #{field}" }
+              end
             end
           end
 

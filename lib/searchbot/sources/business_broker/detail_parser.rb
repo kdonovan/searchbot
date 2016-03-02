@@ -12,8 +12,9 @@ class Searchbot::Sources::BusinessBroker::DetailParser < Searchbot::Generic::Det
 
   def description
     desc = []
-    desc << "[Business Overview]: #{sane get('lbloverview')}" if get('lbloverview').to_s.strip.length > 0
-    desc << "[Property Features]: #{sane get('lblfeatures')}" if get('lblfeatures').to_s.strip.length > 0
+
+    desc << description_section('Business Overview', get('lbloverview')) if get('lbloverview').to_s.strip.length > 0
+    desc << description_section('Property Features', get('lblfeatures')) if get('lblfeatures').to_s.strip.length > 0
 
     desc.join( divider )
   end

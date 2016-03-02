@@ -15,7 +15,7 @@ class PreviouslySeen < StandardError; end
 module Searchbot
 
   BUSINESS_SOURCE_NAMES = %w(biz_buy_sell biz_quest business_broker)
-  WEBSITE_SOURCE_NAMES  = %w(empire_flippers f_e_international latonas website_closers acquisitions_direct i_acquisitions)
+  WEBSITE_SOURCE_NAMES  = %w(empire_flippers f_e_international latonas website_closers acquisitions_direct i_acquisitions website_properties)
 
   def self.business_source_names
     BUSINESS_SOURCE_NAMES

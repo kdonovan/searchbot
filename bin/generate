@@ -107,6 +107,9 @@ create_src_file "searcher.rb", <<-EOS
 class Searchbot::Sources::#{camel_src}::Searcher < Searchbot::Generic::Searcher
 
   #{searcher_fields}
+  def base_url
+  end
+
   def url_for_page(page = nil)
   end
 
@@ -129,7 +132,11 @@ EOS
 
 fname = ROOT + '/lib/searchbot.rb'
 raw = File.read(fname)
-raw = raw.sub(/#{kind.upcase}_SOURCE_NAMES(\s*)= %w\((.+?)\)/, kind.upcase + '_SOURCE_NAMES\1= %w(\2 ' + under_src + ')')
-File.open(fname, 'w') {|f| f.puts raw }
+if raw.match(/#{kind.upcase}_SOURCE_NAMES.*#{under_src}/)
+  puts "* WARNING: #{under_src} appears to already be added to #{kind.upcase}_SOURCE_NAMES"
+else
+  raw = raw.sub(/#{kind.upcase}_SOURCE_NAMES(\s*)= %w\((.+?)\)/, kind.upcase + '_SOURCE_NAMES\1= %w(\2 ' + under_src + ')')
+  File.open(fname, 'w') {|f| f.puts raw }
+  puts "* OK: Inserted #{under_src} into SOURCES in searchbot.rb"
+end
 
-puts "* OK: Inserted #{under_src} into SOURCES in searchbot.rb"

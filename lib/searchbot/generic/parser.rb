@@ -46,6 +46,12 @@ class Searchbot::Generic::Parser
 
   protected
 
+  # Centralize logic here, so we can rely on this format when parsing description
+  # from our own results down the line
+  def description_section(title, body)
+    "[#{sane title}]: #{sane body}"
+  end
+
   def get_parsed(field)
     if self.respond_to?(field)
       self.send(field)
