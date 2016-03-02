@@ -43,7 +43,11 @@ class Searchbot::Sources::WebsiteProperties::ListingParser < Searchbot::Generic:
   private
 
   def title_node
-    doc.at('h2.post-title a')
+    @title_node ||= doc.at('h2.post-title a')
+  end
+
+  def overview_node
+    @overview_node ||= doc.at('ul.overview-detail')
   end
 
   # e.g. USA, Maryland (Baltimore) or USA, Florida (Broward), so
@@ -57,7 +61,7 @@ class Searchbot::Sources::WebsiteProperties::ListingParser < Searchbot::Generic:
   end
 
   def li(label)
-    if l = doc.at('ul.overview-detail').css('li').detect {|l| l.text.match(/#{label}/) }
+    if l = overview_node.css('li').detect {|l| l.text.match(/#{label}/) }
       l.at('span').text
     end
   end

@@ -37,7 +37,7 @@ class Searchbot::Sources::AcquisitionsDirect::DetailParser < Searchbot::Generic:
 
   def li(label)
     strong = doc.css('ul.circle-yes li').detect do |l|
-      l.css('strong').any? {|s| s.text == label || s.text == "#{label}:" }
+      l.css('strong').any? {|s| [label, "#{label}:"].include?(s.text) }
     end
 
     if strong

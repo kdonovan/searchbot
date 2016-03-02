@@ -33,11 +33,11 @@ class Searchbot::Sources::IAcquisitions::ListingParser < Searchbot::Generic::Lis
   private
 
   def title_node
-    doc.at('a')
+    @title_node ||= doc.at('a')
   end
 
   def info
-    doc.at('.info')
+    @info ||= doc.at('.info')
   end
 
   def info_dd(label)

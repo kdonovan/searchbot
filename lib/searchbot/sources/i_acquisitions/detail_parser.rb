@@ -8,6 +8,4 @@ class Searchbot::Sources::IAcquisitions::DetailParser < Searchbot::Generic::Deta
     sane node.text
   end
 
-  private
-
 end

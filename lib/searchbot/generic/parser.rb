@@ -5,7 +5,8 @@ class Searchbot::Generic::Parser
 
   attr_reader :url
 
-  # If given HTML or Nokogiri, will process that. Otherwise, will pull from URL
+  # If given HTML or Nokogiri, will process that. Otherwise, will
+  # automatically pull the HTML in from the provided URL.
   def initialize(html: nil, url: nil, options: {})
     @url = url
 
@@ -16,12 +17,8 @@ class Searchbot::Generic::Parser
     raise ArgumentError, "must provide either :html or :url" unless html || url
   end
 
-  def result
-    raise "Must be implemented in Searchbot::Generic::XXX subclasses"
-  end
-
   def parse
-    raise "Must be explicitly implemented, or implied by the use of the `parses` declaration"
+    raise "Must be explicitly implemented in subclass, or implied by the use of the `parses` declaration"
   end
 
   def self.parses(*fields)
@@ -34,9 +31,8 @@ class Searchbot::Generic::Parser
     end
 
     define_method :parse do
-      # Implement before hook - if it returns false, parse is never actually run
-      do_parsing = !self.respond_to?(:before_parse) || before_parse
-      return unless do_parsing
+      # Implement +before_parse+ hook - if it is present and returns false, skip parsing
+      return if self.respond_to?(:before_parse) && before_parse
 
       fields.each_with_object({}) do |field, hash|
         hash[field] = get_parsed(field)
