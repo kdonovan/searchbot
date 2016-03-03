@@ -9,7 +9,6 @@ class Searchbot::Results::Details < Searchbot::Results::Base
   property :inventory,        transform_with: ->(v) { str2i(v) }
   property :real_estate,      transform_with: ->(v) { str2i(v) }
   property :employees,        transform_with: ->(v) { str2i(v) }
-  property :established,      transform_with: ->(v) { str2i(v) }
   property :seller_financing, transform_with: ->(v) { str2i(v) }
   property :reason_selling,   transform_with: ->(v) { sane(v) }
 

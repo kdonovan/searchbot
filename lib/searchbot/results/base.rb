@@ -8,15 +8,17 @@ module Searchbot
     property :identifier,   required: true
     property :link,         required: true
 
-    property :price,    transform_with: ->(v) { str2i(v) }
-    property :cashflow, transform_with: ->(v) { str2i(v) }
-    property :revenue,  transform_with: ->(v) { str2i(v) }
+    property :price,        transform_with: ->(v) { str2i(v) }
+    property :cashflow,     transform_with: ->(v) { str2i(v) }
+    property :revenue,      transform_with: ->(v) { str2i(v) }
 
-    property :title,    transform_with: ->(v) { sane(v) }
-    property :teaser,   transform_with: ->(v) { sane(v) }
+    property :title,        transform_with: ->(v) { sane(v) }
+    property :teaser,       transform_with: ->(v) { sane(v) }
 
-    property :city,     transform_with: ->(v) { sane(v) }
-    property :state,    transform_with: ->(v) { sane(v) }
+    property :city,         transform_with: ->(v) { sane(v) }
+    property :state,        transform_with: ->(v) { sane(v) }
+
+    property :established,  transform_with: ->(v) { sane(v) }
 
     property :listed_at
 

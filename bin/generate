@@ -85,27 +85,29 @@ create_src_file "listings_page.rb", <<-EOS
 class Searchbot::Sources::#{camel_src}::ListingsPage < Searchbot::Generic::ListingsPage
 
   def raw_listings
+    doc.css('')
   end
 
   def more_pages_available?
+    binding.pry
     raise "more_pages_available? must be implemented in #{camel_src}"
   end
 
 end
 EOS
 
-searcher_fields = if kind == 'business'
-  "searchable_filters :keyword\n\n"
-end
+searcher_fields = kind == 'business' ? "searchable_filters :keyword\n\n" : "\n\n"
 
 create_src_file "searcher.rb", <<-EOS
 class Searchbot::Sources::#{camel_src}::Searcher < Searchbot::Generic::Searcher
 
   #{searcher_fields}
   def base_url
+    ''
   end
 
   def url_for_page(page = nil)
+    base_url
   end
 
 end
