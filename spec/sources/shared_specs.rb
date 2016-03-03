@@ -86,6 +86,8 @@ RSpec.shared_examples "a valid source" do |config|
       custom_filters = {
         ratio: 3,
         hours_required: 2,
+        max_revenue: 400_000,
+        max_price: 300_000,
       }
 
       %i(price cashflow revenue ratio hours_required).each do |field|
@@ -99,7 +101,7 @@ RSpec.shared_examples "a valid source" do |config|
           end
 
           context "filters by #{direction} #{field}", vcr: vcr_opts.merge(vcr_extra) do
-            let(:filters) { Filters.new(key => custom_filters[field] || 200_000) }
+            let(:filters) { Filters.new(key => custom_filters[field] || custom_filters[key] || 200_000) }
 
             it "correctly" do
 

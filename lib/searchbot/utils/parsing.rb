@@ -2,9 +2,10 @@ module Searchbot::Utils::Parsing
 
   def sane(string)
     return unless string
-    string = string.strip.gsub(/\.(\S)/, '. \1')
+    string = string.text if string.respond_to?(:text) # Handle passing in Nokogiri elements directly
+    string = string.to_s.strip.gsub(/\.(\S)/, '. \1')
 
-    if string && string.upcase == string
+    if string.upcase == string
       string.downcase.split('. ').map {|s| s.strip.capitalize }.join('. ')
     else string
     end
