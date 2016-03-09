@@ -22,6 +22,8 @@ module Searchbot::Utils::Parsing
     str = string.to_s
     return unless str && str.strip.length > 0
     return if str =~ /\A\s*not disclosed\s*\z/i
+    return if str =~ /\A\s*undisclosed\s*\z/i
+    return if str =~ /\A\s*n\/a\s*\z/i
     str.gsub(/[^\d.]/, '').to_i
   end
 

@@ -1,6 +1,8 @@
 class Searchbot::Sources::BizQuest::Searcher < Searchbot::Generic::Searcher
 
-  BASE_URL = "http://www.bizquest.com/Handlers/SearchRedirector.ashx"
+  def base_url
+    "http://www.bizquest.com/Handlers/SearchRedirector.ashx"
+  end
 
   def url_for_page(page = nil)
     url = redirected_base_search_url
@@ -61,7 +63,7 @@ class Searchbot::Sources::BizQuest::Searcher < Searchbot::Generic::Searcher
         o: 2, # This is the magical number for sorting by newest-to-oldest
       }
 
-      url_for_redirection = [BASE_URL, params.map {|k, v| [k, v].join('=')}.join('&')].join('?')
+      url_for_redirection = generate_url(params: params)
       response = HTTParty.get(url_for_redirection, headers: headers)
 
       response.request.last_uri.to_s

@@ -90,6 +90,14 @@ class Searchbot::Generic::Searcher
     raise "Must be implemented in child class"
   end
 
+  def generate_url(base: base_url, params:)
+    param_string = params.map do |k, v|
+      [k, v].join('=')
+    end.join('&')
+
+    [base, param_string].join('?')
+  end
+
   def get_listings
     @listings = []
     more_pages = true

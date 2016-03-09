@@ -7,7 +7,7 @@ class Searchbot::Sources::IAcquisitions::ListingParser < Searchbot::Generic::Lis
   end
 
   def link
-    URI.join(page.searcher.base_url, title_node['href']).to_s
+    make_absolute title_node['href']
   end
 
   def title

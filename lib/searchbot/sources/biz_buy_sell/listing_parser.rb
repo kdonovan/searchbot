@@ -16,8 +16,7 @@ class Searchbot::Sources::BizBuySell::ListingParser < Searchbot::Generic::Listin
   end
 
   def link
-    base = base = page.searcher.base_url
-    URI.join(base_url, doc['href']).to_s
+    make_absolute doc['href']
   end
 
   def title

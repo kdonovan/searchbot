@@ -12,9 +12,7 @@ class Searchbot::Sources::BusinessBroker::ListingParser < Searchbot::Generic::Li
   def state;      get('State') end
 
   def link
-    base = page.searcher.base_url
-
-    URI.join( base, get('URL') ).to_s
+    make_absolute get('URL')
   end
 
 

@@ -7,11 +7,13 @@ class Searchbot::Sources::Latonas::Searcher < Searchbot::Generic::Searcher
   # In theory we have to log in first for full details, but in practice
   # all the info we actually need is present, just hidden in the UI.
 
-  BASE_URL   = 'https://latonas.com/websites-for-sale'
+  def base_url
+    'https://latonas.com/websites-for-sale'
+  end
 
   def url_for_page(page = 1)
     raise "Latonas has a single page of search results" unless page == 1
-    BASE_URL
+    base_url
   end
 
 end

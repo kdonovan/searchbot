@@ -25,4 +25,8 @@ class Searchbot::Generic::ListingParser < Searchbot::Generic::Parser
     {searcher: page.searcher, raw_listing: html}
   end
 
+  def make_absolute(url, base: page.searcher.base_url)
+    URI.join( base, url ).to_s
+  end
+
 end

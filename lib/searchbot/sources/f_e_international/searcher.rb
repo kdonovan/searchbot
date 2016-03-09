@@ -2,11 +2,13 @@ class Searchbot::Sources::FEInternational::Searcher < Searchbot::Generic::Search
 
   # Typical scraping, no need to pull in second page for detailed view
 
-  BASE_URL = 'http://feinternational.com/buy-a-website/'
+  def base_url
+    'http://feinternational.com/buy-a-website/'
+  end
 
   def url_for_page(page = 1)
     raise "FEInternational has a single page of search results" unless page == 1
-    BASE_URL
+    base_url
   end
 
 end

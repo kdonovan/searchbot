@@ -48,7 +48,7 @@ class Searchbot::Sources::BizBuySell::Searcher < Searchbot::Generic::Searcher
 
     params['pg'] = page unless page.nil?
 
-    [base_url, params.map {|k, v| [k, v].join('=')}.join('&')].join('?')
+    generate_url(params: params)
   end
 
 end

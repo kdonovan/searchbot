@@ -18,9 +18,8 @@ class Searchbot::Sources::BizQuest::ListingParser < Searchbot::Generic::ListingP
 
   def link
     @link ||= begin
-      base = page.searcher.redirected_base_search_url
       relative = title_node['href']
-      absolute = URI.join(base, relative)
+      absolute = make_absolute(relative, base: page.searcher.redirected_base_search_url)
       absolute.to_s.split('?')[0]
     end
   end
