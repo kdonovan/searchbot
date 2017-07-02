@@ -39,6 +39,10 @@ For a web UI with some other useful goodies, check out [bizsearch](https://githu
 | ListingParser | Given a chunk of data (usually HTML) from ListingsPage, parse it into a standardized Result class. When we want additional information only available on the result's standalone page (e.g. the listings page usually shows a teaser, but the full description is often only shown on a result-specific page), we invoke DetailParser.|
 | DetailParser | Given a general `Searchbot::Results::Listing`, parses out all the remaining details (usually by loading the listing's link and parsing remaining details from that page).|
 
+## TODOs
+
+  * Use keyword as a search-based filter for those sites that support it
+  * Add abstraction layer to allow applying multiple OR filters to one result set without re-requesting the raw listings data
 
 ## Development
 
