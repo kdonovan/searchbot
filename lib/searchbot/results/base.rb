@@ -53,14 +53,17 @@ module Searchbot
     end
 
     def search_time_filters
-      [:keyword]
+      []
     end
 
     def passes_filters?(filters)
       passes_hardcoded_filters? && filters.all? do |key, value|
+
         # Skip any filters with nil values. Some filter keys are for search-time only, not after-search filtering.
         if value.nil? || search_time_filters.include?(key)
           true
+        elsif :keyword == key       # The only non-straight-forward filter is to check multiple fields against the keyword
+          passes_keyword_filter?(value)
         else
           # Some filters must be applied to the detailed version - if so, grab the details now
           to_test = (self.respond_to?(:detail) && detail_required_to_filter?(key)) ? self.detail : self
@@ -175,12 +178,22 @@ module Searchbot
       end
     end
 
-    # A collection of hardcoded filters
+    # A collection of hardcoded filters to avoid returning spammy results
     def passes_hardcoded_filters?
       # If we have decent revenue, but cashflow is almost equal to revenue, that's sketchy
       return if cashflow && revenue && revenue > 200_000 && (cashflow > revenue - 50_000)
 
       true
+    end
+
+    # Return early on teaser if possible, else load details
+    def passes_keyword_filter?(value)
+      return true if title.to_s =~ /#{value}/i
+      return true if teaser.to_s =~ /#{value}/i
+
+      with_description = self.respond_to?(:detail) ? self.detail : self
+      return false unless with_description.respond_to?(:description)
+      with_description.description.to_s =~ /#{value}/i
     end
 
   end

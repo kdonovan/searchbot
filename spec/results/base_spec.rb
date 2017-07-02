@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe Searchbot::Results::Base do
+  base_params = {identifier: 1, link: 'testing'}
 
   context "#parse_location" do
-    base_params = {identifier: 1, link: 'testing'}
     locations = {
       'Seattle, WA' => ['Seattle', 'WA'],
       'Seattle Metro, Washington' => ['Seattle Metro', 'WA'],
@@ -32,6 +32,21 @@ describe Searchbot::Results::Base do
         end
       end
 
+    end
+  end
+
+  context "keyword filter" do
+    let(:filter) { Filters.new(keyword: 'awesome') }
+    let(:awesome1) { Searchbot::Results::Base.new(base_params.merge(title: 'This is awesome'))}
+    let(:awesome2) { Searchbot::Results::Base.new(base_params.merge(title: 'This is cool', teaser: 'Awesome things happen here!'))}
+    let(:awesome3) { Searchbot::Results::Details.new(base_params.merge(title: 'This is cool', description: 'Awesome things happen here!'))}
+    let(:boring)   { Searchbot::Results::Base.new(base_params.merge(title: 'This is kinda boring', ))}
+
+    it "properly parses" do
+      expect( awesome1.passes_filters?(filter) ).to be true
+      expect( awesome2.passes_filters?(filter) ).to be true
+      expect( awesome3.passes_filters?(filter) ).to be true
+      expect( boring.passes_filters?(filter) ).to be false
     end
   end
 

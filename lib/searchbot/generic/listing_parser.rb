@@ -14,7 +14,8 @@ class Searchbot::Generic::ListingParser < Searchbot::Generic::Parser
   end
 
   def result
-    params = result_defaults.merge( parse )
+    return unless parsed = parse
+    params = result_defaults.merge( parsed )
 
     Searchbot::Results::Listing.new( params )
   end

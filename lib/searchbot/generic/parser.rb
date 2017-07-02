@@ -18,7 +18,7 @@ class Searchbot::Generic::Parser
   end
 
   def parse
-    raise "Must be explicitly implemented in subclass, or implied by the use of the `parses` declaration"
+    raise "Must be explicitly implemented in subclass (or implied by the use of the `parses` declaration)"
   end
 
   def self.parses(*fields)

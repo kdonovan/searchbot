@@ -19,8 +19,8 @@ class Searchbot::Sources::WebsiteProperties::DetailParser < Searchbot::Generic::
   end
 
   def description
-    base = doc.at('.entry-content').css('div').map do |div|
-      txt = div.text.strip
+    base = doc.at('.entry-content').css('p').map do |section|
+      txt = section.text.strip
       txt.length > 0 ? txt : nil
     end.compact
 
@@ -42,6 +42,7 @@ class Searchbot::Sources::WebsiteProperties::DetailParser < Searchbot::Generic::
 
   def info(label)
     if node = doc.at('.overview').css('div.label').detect {|n| n.text == label }
+      node = node.next
       node = node.next until node.name == 'div'
       node.text.strip == 'N/A' ? nil : node.text
     end

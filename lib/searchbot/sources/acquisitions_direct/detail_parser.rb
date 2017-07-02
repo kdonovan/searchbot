@@ -36,13 +36,11 @@ class Searchbot::Sources::AcquisitionsDirect::DetailParser < Searchbot::Generic:
   private
 
   def li(label)
-    strong = doc.css('ul.circle-yes li').detect do |l|
+    return unless strong = doc.css('ul.circle-yes li').detect do |l|
       l.css('strong').any? {|s| [label, "#{label}:"].include?(s.text) }
     end
 
-    if strong
-      strong.text.split("#{label}:").last.split(' (').first
-    end
+    strong.text.split("#{label}:").last.split(' (').first
   end
 
   def price_text
