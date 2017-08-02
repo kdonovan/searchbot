@@ -15,15 +15,15 @@ class Searchbot::Sources::QuietLight::ListingParser < Searchbot::Generic::Listin
   end
 
   def price
-    doc.at('.asking-value')
+    doc.at('.bottom_info .line_1 span')
   end
 
   def revenue
-    get('revenue-meta')
+    info 'Revenue'
   end
 
   def cashflow
-    get('revenue-income')
+    info 'Income'
   end
 
   def teaser
@@ -32,8 +32,10 @@ class Searchbot::Sources::QuietLight::ListingParser < Searchbot::Generic::Listin
 
   private
 
-  def get(css_class)
-    doc.at(".#{css_class}").text.split(':').last
+  def info(label)
+    if para = doc.css(".line_2 p").detect {|para| para.text =~ /#{label}/ }
+      para.text.split(':').last
+    end
   end
 
 end

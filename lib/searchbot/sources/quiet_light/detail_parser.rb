@@ -3,13 +3,7 @@ class Searchbot::Sources::QuietLight::DetailParser < Searchbot::Generic::DetailP
   parses :description
 
   def description
-    desc = []
-    doc.at('.listing-description').children.each do |node|
-      desc << node.text.gsub(/\n/, ' ') if node.name == 'p'
-      break if node['id'] == 'tve_leads_end_content'
-    end
-
-    desc.join(divider)
+    doc.css('.description p').map(&:text).join(divider)
   end
 
 end
