@@ -1,7 +1,7 @@
 class Searchbot::Sources::Latonas::ListingsPage < Searchbot::Generic::ListingsPage
 
   def raw_listings
-    doc.css('table#listing_data tbody tr')
+    doc.css('.ct-itemProducts')
   end
 
   def more_pages_available?

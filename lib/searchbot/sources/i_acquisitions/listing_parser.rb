@@ -15,19 +15,19 @@ class Searchbot::Sources::IAcquisitions::ListingParser < Searchbot::Generic::Lis
   end
 
   def price
-    info.at('.blue strong').text
+    doc.at('.asking-price')
   end
 
   def cashflow
-    info_dd('Net Profit')
+    info 'Net Profit'
   end
 
   def revenue
-    info_dd('Revenue')
+    info 'Revenue'
   end
 
   def teaser
-    doc.at('.cloud-content p').text.gsub('<br>', divider)
+    doc.at('.subject p').text.gsub('<br>', divider).sub(/Read More$/, '')
   end
 
   private
@@ -36,13 +36,13 @@ class Searchbot::Sources::IAcquisitions::ListingParser < Searchbot::Generic::Lis
     @title_node ||= doc.at('a')
   end
 
-  def info
-    @info ||= doc.at('.info')
+  def info_section
+    doc.at('.value')
   end
 
-  def info_dd(label)
-    if dt = info.css('dt').detect{|dt| dt.text == label }
-      dt.parent.at('dd').text
+  def info(label)
+    if info_title = info_section.css('.price-title').detect{|l| l.text == label }
+      info_title.css('+ .price').text
     end
   end
 

@@ -1,19 +1,39 @@
 class Searchbot::Sources::Latonas::Searcher < Searchbot::Generic::Searcher
 
-  # Standard web scraping, it's all in a mostly-hidden table and all initial
-  # listings are on one page (still need detail page for descriptions, but
-  # no listing page pagination required).
-  #
-  # In theory we have to log in first for full details, but in practice
-  # all the info we actually need is present, just hidden in the UI.
+  # TODO: log in when pulling details... ?
 
   def base_url
-    'https://latonas.com/websites-for-sale'
+    'https://latonas.com/listings/'
   end
 
   def url_for_page(page = 1)
-    raise "Latonas has a single page of search results" unless page == 1
-    base_url
+    params = {
+      price_range:    param_range(:price),
+      revenue_range:  param_range(:revenue),
+      profit:         param_range(:cashflow),
+      unique_range: 'any',
+      broker: 'any',
+      result_sorting_order: 'age_dsc',
+      result_sorting_quantity: 60,
+      page: page
+    }
+
+    generate_url(params: params)
+  end
+
+  private
+
+  def param_range(label)
+    min = filters.send("max_#{label}")
+    max = filters.send("min_#{label}")
+
+    if min || max
+      min ||= 0
+      max ||= 500_000_000
+      [min, max].join('-')
+    else
+      'any'
+    end
   end
 
 end

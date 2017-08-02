@@ -1,9 +1,9 @@
 class Searchbot::Sources::IAcquisitions::ListingsPage < Searchbot::Generic::ListingsPage
 
   def raw_listings
-    doc.css('.buy-cloud').select do |div|
-      title = div.at('a').text
-      ! title[/SOLD/] && ! title[/SALE PENDING/]
+    doc.css('ul.item-list > li').select do |li|
+      title = li.at('h3').text
+      ! title.include?('SOLD') && !title.include?('SALE PENDING')
     end
   end
 

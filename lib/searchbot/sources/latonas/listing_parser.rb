@@ -1,48 +1,33 @@
 class Searchbot::Sources::Latonas::ListingParser < Searchbot::Generic::ListingParser
 
-  parses :identifier, :price, :revenue, :cashflow, :listed_at, :link, :title, :teaser
+  parses :identifier, :price, :revenue, :cashflow, :link, :title, :teaser
 
-  def identifier; data[:slug].text    end
-  def price;      data[:price].text   end
-  def revenue;    data[:revenue].text end
-  def cashflow;   data[:profit].text  end
+  def identifier
+    link.match(/\/listings\/(.+?)\//)[1]
+  end
 
-  def listed_at
-    Date.strptime(data[:listed_date], '%Y-%m-%d')
+  def price
+    doc.at('.ct-product--price').text
+  end
+
+  def revenue
+    doc.at('span[title=Revenue]').text
+  end
+
+  def cashflow
+    doc.at('span[title=Profit]').text
   end
 
   def title
-    if node = data[:title].at('a').remove
-      node.remove
-    end
-
-    data[:title].text
+    doc.at('.ct-product--tilte').text
   end
 
   def link
-    detail_url data[:slug].text
+    make_absolute doc.at('a')['href']
   end
 
   def teaser
-    type = data[:monetization].text.split('|').compact.join('/')
-    cat  = data[:category].text.split('|').compact.join('/')
-
-    "#{type} website in the #{cat} space(s)"
-  end
-
-  private
-
-  LISTING_KEYS = %i(picture title uniques revenue profit listed_date monetization link category featured high low reduced alexa pr inbound keywords semrush tags is_new slug blank uniques2 revenue2 profit2 price)
-
-  def data
-    @data ||= begin
-      values = doc.css('td')
-      Hash[ *LISTING_KEYS.zip(values).flatten ]
-    end
-  end
-
-  def detail_url(slug)
-    "https://latonas.com/websites-for-sale/%s" % slug
+    doc.at('.ct-product--description p').text
   end
 
 end

@@ -1,9 +1,9 @@
 class Searchbot::Sources::WebsiteClosers::ListingsPage < Searchbot::Generic::ListingsPage
 
-  attr_reader :seen_sold_listing
+  attr_accessor :seen_sold_listing
 
   def raw_listings
-    doc.css('.listing ul')
+    doc.css('form#website li')
   end
 
   def more_pages_available?

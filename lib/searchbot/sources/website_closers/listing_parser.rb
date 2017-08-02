@@ -3,35 +3,31 @@ class Searchbot::Sources::WebsiteClosers::ListingParser < Searchbot::Generic::Li
   parses :identifier, :price, :cashflow, :link, :title, :teaser
 
   def before_parse
-    return true if price_node.at('strong').text == 'Available'
+    return true if title_node.at('span.avail')
 
     page.seen_sold_listing = true
     return nil
   end
 
-  def link;       title_node['href']              end
-  def identifier; link.split('/').last            end
-  def price;      price_node.at('p').text         end
-  def cashflow;   cashf_node.text                 end
-  def title;      title_node.text                 end
-  def teaser;     doc.at('> p').text              end
+  def link;       title_node['href']                  end
+  def identifier; link.split('/').last                end
+  def price;      price_node.children.last.text       end
+  def cashflow;   cashf_node.children.last.text       end
+  def title;      title_node.text                     end
+  def teaser;     doc.at('p').text                    end
 
   private
-
-  def prepare_doc(raw)
-    raw.at('.disc_box')
-  end
 
   def title_node
     doc.at('span:first-child a')
   end
 
   def price_node
-    doc.at('span:nth-child(2)')
+    doc.at('span.asking-price')
   end
 
   def cashf_node
-    doc.at('span:nth-child(3)')
+    doc.at('span.cach-flow-price')
   end
 
 end

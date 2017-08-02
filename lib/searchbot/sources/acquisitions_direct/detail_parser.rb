@@ -3,11 +3,13 @@ class Searchbot::Sources::AcquisitionsDirect::DetailParser < Searchbot::Generic:
   parses :price, :cashflow, :revenue, :employees, :established, :description, :inventory
 
   def price
-    price_text.split('(').first.strip
+    price_text.split('(').first.strip.sub('Asking Price: ', '')
   end
 
   def cashflow
-    li('Profit')
+    # TODO: sometimes contains additional text indicating e.g. only part of a year is included
+    li("#{Date.today.year} Profit") || li("#{Date.today.year}Profit") ||
+      li("#{Date.today.year - 1} Profit") || li("#{Date.today.year - 1}Profit")
   end
 
   def revenue
@@ -27,8 +29,8 @@ class Searchbot::Sources::AcquisitionsDirect::DetailParser < Searchbot::Generic:
   end
 
   def inventory
-    if price_text.match(/\(plus inventory/)
-      price_text.split('(').last
+    if price_text.include?('plus inventory')
+      price_text.split('(').last.split(':').last.sub(/\)/, '').strip
     end
   end
 
@@ -37,10 +39,10 @@ class Searchbot::Sources::AcquisitionsDirect::DetailParser < Searchbot::Generic:
 
   def li(label)
     return unless strong = doc.css('ul.circle-yes li').detect do |l|
-      l.css('strong').any? {|s| [label, "#{label}:"].include?(s.text) }
+      l.css('strong').text.include? label
     end
 
-    strong.text.split("#{label}:").last.split(' (').first
+    strong.text.split(':').last.split(/[\(–]/).first
   end
 
   def price_text

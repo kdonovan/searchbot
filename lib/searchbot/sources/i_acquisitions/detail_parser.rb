@@ -1,11 +1,27 @@
 class Searchbot::Sources::IAcquisitions::DetailParser < Searchbot::Generic::DetailParser
 
-  parses :description
+  parses :description, :inventory, :established, :employees
 
   def description
-    node = doc.at('.info')
-    node = node.next until node.name == 'p'
-    sane node.text
+    doc.at('.left-column p').text.gsub('<br>', divider)
+  end
+
+  def inventory
+    info 'inventory'
+  end
+
+  def established
+    info 'established'
+  end
+
+  def employees
+    info 'employees'
+  end
+
+  private
+
+  def info(label_class)
+    doc.at(".right-column .#{label_class}").css('+ .data').text
   end
 
 end
