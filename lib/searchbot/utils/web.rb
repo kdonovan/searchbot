@@ -7,7 +7,10 @@ module Searchbot::Utils::Web
   def fetch_json(url, params)
     response = HTTParty.post(
       url,
-      headers: headers.merge('Content-Type' => 'application/json; charset=UTF-8'),
+      headers: headers.merge({
+        'Content-Type' => 'application/json',
+        'Accept'       => 'application/json',
+      }),
       body: params.to_json
     )
 

@@ -2,6 +2,12 @@
 
 Searchbot is an adapter to various business listing websites, allowing searches to be automated and filters applied. It was created to scratch the very, very annoying itch of existing sites offering email alerts without any of the filters you'd actually care about if you were, you know, actually looking to buy a business.
 
+## Status
+
+Currently out-of-date sources:
+
+  * BizBuySell
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -22,7 +28,7 @@ Check the specs for detailed usage.  In brief, to search e.g. BizQuest:
 ```ruby
   filters  = Filters.new(min_cashflow: 100_000)
   searcher = Searchbot::Sources::BizQuest::Searcher.new(filters)
-  listings = searcher.listings # or searcher.detailed_listings in you want each result to be fully prepopulated with its details
+  listings = searcher.listings # or searcher.detailed_listings if you want each result to be fully prepopulated with its details
 ```
 
 This will return an array of Searchbot::Results (specifically either `Searchbot::Results::Listing` or `Searchbot::Results::Detail`, depending on whether that specific result has fetched its detail page data yet).

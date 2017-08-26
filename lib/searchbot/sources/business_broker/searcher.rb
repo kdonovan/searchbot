@@ -18,7 +18,8 @@ class Searchbot::Sources::BusinessBroker::Searcher < Searchbot::Generic::Searche
 
     params_for_search.merge({
       startAt: (page - 1) * per_page + 1,
-      howMany: per_page
+      howMany: per_page,
+      initialHowMany: per_page,
     })
   end
 
@@ -48,7 +49,9 @@ class Searchbot::Sources::BusinessBroker::Searcher < Searchbot::Generic::Searche
       ownerFinancing: 0,
       countyId: 0,
       strListedOnDate: '',
-      sortBy: 'l.flisting DESC, l.ldate DESC', # Newest to oldest
+      sortBy: 'l.flisting DESC, l.ldate DESC', # Newest to oldest,
+      includeFranchise: false,
+      franchiseListingFrequency:0,
     }
   end
 
