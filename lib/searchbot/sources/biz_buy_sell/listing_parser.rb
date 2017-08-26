@@ -2,9 +2,8 @@ class Searchbot::Sources::BizBuySell::ListingParser < Searchbot::Generic::Listin
 
   parses :identifier, :price, :cashflow, :link, :title, :location, :teaser
 
-
   def identifier
-    doc['data-listnumber']
+    doc_root['data-listnumber']
   end
 
   def price
@@ -16,7 +15,7 @@ class Searchbot::Sources::BizBuySell::ListingParser < Searchbot::Generic::Listin
   end
 
   def link
-    make_absolute doc['href']
+    make_absolute doc_root['href']
   end
 
   def title
@@ -35,6 +34,11 @@ class Searchbot::Sources::BizBuySell::ListingParser < Searchbot::Generic::Listin
 
   def info
     doc.at('.priceBlock')
+  end
+
+  # Perhaps a version issue, but doc is now wrapped in html/body tags
+  def doc_root
+    doc['href'].nil? ? doc.at('a') : doc
   end
 
 end

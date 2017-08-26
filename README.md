@@ -2,12 +2,6 @@
 
 Searchbot is an adapter to various business listing websites, allowing searches to be automated and filters applied. It was created to scratch the very, very annoying itch of existing sites offering email alerts without any of the filters you'd actually care about if you were, you know, actually looking to buy a business.
 
-## Status
-
-Currently out-of-date sources:
-
-  * BizBuySell
-
 ## Installation
 
 Add this line to your application's Gemfile:

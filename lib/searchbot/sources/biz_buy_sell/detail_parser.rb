@@ -1,44 +1,52 @@
 class Searchbot::Sources::BizBuySell::DetailParser < Searchbot::Generic::DetailParser
 
-  parses :revenue, :cashflow_from, :ffe, :inventory, :real_estate, :established, :employees, :description, :seller_financing
+  parses :revenue, :cashflow_from, :ffe, :inventory, :established, :description, :seller_financing, :employees
 
-  def revenue; get(1) end
-  def cashflow_from; [get(2), get(3)] end
+  def cashflow_from; [get(1), get(3)] end
+  def revenue; get(2) end
   def ffe; get(4) end
   def inventory; get(5) end
-  def real_estate; get(6) end
   def established; get(7) end
-  def employees; get(8) end
+
+  def employees
+    detail 'Employees'
+  end
 
   def description
-    desc = []
-    node = doc.at('#listingActions')
-
-    loop do
-      node = node.next
-      break if node.nil?
-      desc << node.to_html
-
-      break if node['class'] == 'listingProfile_details'
-    end
-
-    desc.join( divider )
+    doc.at('.businessDescription').text.strip
   end
 
   def seller_financing
-    !!doc.at('#seller-financing')
+    !!financials.at('#seller-financing')
   end
-
 
   private
 
   def prepare_doc(raw)
     raw.xpath("//script").remove
-    raw.at('.financials')
+    raw.at('.financials').parent
+  end
+
+  def financials
+    doc.at('.financials')
   end
 
   def get(label)
-    doc.css('p')[label].at('b').text
+    if matched = financials.css('p')[label]
+      matched.at('b').text
+    end
+  end
+
+  def details
+    doc.at('dl.listingProfile_details')
+  end
+
+  def detail(label)
+    return unless details
+
+    if matched = details.css('dt').detect {|dt| dt.text == "#{label}:"}
+      matched.at('+ dd').text
+    end
   end
 
 end
